@@ -9,10 +9,10 @@
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="apple-mobile-web-app-title" content="Room Mates">
+<meta name="apple-mobile-web-app-title" content="Death Avenue">
 <meta property="og:image" content="icon-512.png">
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
-<title>Room Mates AR</title>
+<title>Death Avenue</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600;700&display=swap">
@@ -212,7 +212,7 @@ input[type=text]{width:100%;background:var(--raise);border:1px solid var(--line)
   <section id="menu" class="block">
     <div class="menu-card">
       <p class="eyebrow">Life-size AR people</p>
-      <h1>Room<br><span>Mates</span></h1>
+      <h1>Death<br><span>Avenue</span></h1>
       <p class="lede">Design people from head to sneakers and hang out with them in a life-size room. Move your phone to look around, walk up to them, and watch them wander, sit down and react when you bump into them.</p>
       <div class="menu-actions">
         <button id="btnAR" class="btn primary"><span>Start AR<br><small>Move your phone to look around</small></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8V5a2 2 0 0 1 2-2h3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M8 21H5a2 2 0 0 1-2-2v-3"/><circle cx="12" cy="12" r="3.5"/></svg></button>
@@ -1333,13 +1333,13 @@ function activityOf(p){
 function personaFor(p){
  const c=p.cfg,others=W.people.filter(o=>o!==p).map(o=>o.cfg.name),me=ME.name&&ME.name!=='You'?ME.name:'the player';
  const hair=c.hair==='bald'?'a shaved head':`${c.hair==='buzz'?'a buzz cut':c.hair+' hair'}`;
- return `You are ${c.name}, a life-size person living in a cozy shared room in the game "Room Mates". ${me} is standing in the room talking to you, and your reply appears as a speech bubble over your head.
+ return `You are ${c.name}, a life-size person living in a cozy shared room in the game "Death Avenue". ${me} is standing in the room talking to you, and your reply appears as a speech bubble over your head.
 About you: about ${c.height} cm tall, with ${hair}, wearing ${TOP_TXT[c.top]||'casual clothes'}${(c.extras||[]).length?' and '+c.extras.join(', '):''}. Your personality: ${VIBE_TXT[c.vibe]||VIBE_TXT.social}.
 Right now you are ${activityOf(p)}.${others.length?' Also in the room: '+others.join(', ')+'.':''}
 How to reply: stay in character as ${c.name}, warm and casual. Answer any question or topic ${me==='the player'?'they':me} brings up honestly and helpfully, the way a smart friend would. Keep it short, one to three sentences, so it fits in a speech bubble, unless they ask for more. Use plain words only: no emojis, lists, stage directions or markdown.`;
 }
 function shortPersona(p){const c=p.cfg,me=ME.name&&ME.name!=='You'?ME.name:'the player';
- return `You are ${c.name}, a character in a cozy shared room in the game Room Mates. Personality: ${VIBE_TXT[c.vibe]||VIBE_TXT.social}. You are ${activityOf(p)}. ${me} is talking to you face to face. Reply as ${c.name} in one or two short, casual sentences. Answer any question as well as you can. No emojis, lists or narration.`;}
+ return `You are ${c.name}, a character in a cozy shared room in the game Death Avenue. Personality: ${VIBE_TXT[c.vibe]||VIBE_TXT.social}. You are ${activityOf(p)}. ${me} is talking to you face to face. Reply as ${c.name} in one or two short, casual sentences. Answer any question as well as you can. No emojis, lists or narration.`;}
 const JOKES=["Why did the couch go to therapy? It had too many people sitting on its feelings.","I told my plant a joke. It didn't laugh, but it grew on me.","What do you call a lazy kangaroo? A pouch potato."];
 function scriptedReply(p,text){
  const t=text.toLowerCase(),n=p.cfg.name,me=ME.name&&ME.name!=='You'?' '+ME.name:'',v=p.cfg.vibe;
