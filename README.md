@@ -10,4 +10,6 @@ GPS mode puts your own character on a real satellite map that follows you as you
 
 Talking: tap the mic and talk to whoever you face. They answer in a speech bubble over their head. Replies come from a small AI that runs on each player's phone (WebLLM), so chatting is free and unlimited for everyone. It downloads once, then works offline. Phones that can't run it get simple built-in replies, and you can optionally add a Claude key for smarter answers.
 
+Weapons: seven guns hang on the rack and sit on the coffee table. With hands on, reach out and close your hand to grab one, squeeze a tight fist to shoot, and open your hand wide to drop it. With hands off, use the Interact and Shoot buttons. Blood can be turned off with the Blood button.
+
 Satellite imagery © Esri, Maxar, Earthstar Geographics, and the GIS user community.
