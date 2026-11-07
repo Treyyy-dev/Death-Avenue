@@ -1277,7 +1277,16 @@ class HandRig{
   this.fx=Array.from({length:63},()=>new OneEuro(1.4,.06));this.fD=new OneEuro(.5,.1);this.curl=0;this.prevCurl=0;this.gun=null;this.armed=false;this.openT=0;this.near=null;this.laser=null;this.palmC=new THREE.Vector3();
   const pg=new THREE.BufferGeometry();pg.setAttribute('position',new THREE.BufferAttribute(new Float32Array(14*3),3));const ix=[];for(let i=0;i<6;i++){const a=1+i,b=1+(i+1)%6;ix.push(0,a,b,7,7+b,7+a);}pg.setIndex(ix);
   this.palm=new THREE.Mesh(pg,this.mat);this.palm.castShadow=true;this.palm.frustumCulled=false;this.g.add(this.palm);
+  // arm: forearm, elbow, upper arm, plus sleeves that match your character's top
+  this.sleeveMat=new THREE.MeshStandardMaterial({color:'#2a4f8f',roughness:.85,side:THREE.DoubleSide});
+  this.fore=new THREE.Mesh(new THREE.CylinderGeometry(.027,.037,1,16,1,true),this.mat);this.upper=new THREE.Mesh(new THREE.CylinderGeometry(.04,.05,1,16,1,true),this.mat);
+  this.elbow=new THREE.Mesh(sg,this.mat);this.elbow.scale.setScalar(.04);this.wristJ=new THREE.Mesh(sg,this.mat);this.wristJ.scale.setScalar(.026);
+  this.foreSl=new THREE.Mesh(new THREE.CylinderGeometry(.034,.044,1,16,1,true),this.sleeveMat);this.upSl=new THREE.Mesh(new THREE.CylinderGeometry(.047,.057,1,16,1,true),this.sleeveMat);
+  this.elbowSl=new THREE.Mesh(sg,this.sleeveMat);this.elbowSl.scale.setScalar(.046);
+  for(const m of[this.fore,this.upper,this.elbow,this.wristJ,this.foreSl,this.upSl,this.elbowSl]){m.castShadow=true;m.frustumCulled=false;this.g.add(m);}
+  this.side=1;this.applyMe();
  }
+ applyMe(){this.mat.color.set(SKIN[ME.skin]??SKIN[3]);this.sleeveMat.color.set(ME.topColor||'#2a4f8f');const t=ME.top;this.sleeve=t==='tank'?'none':(t==='longsleeve'||t==='hoodie'||t==='jacket')?'long':'short';}
  place(camObj,dt){
   const k=1-Math.exp(-30*dt);
   for(let i=0;i<21;i++){this.cam[i].lerp(this.tgt[i],k);this.w[i].copy(this.cam[i]).applyMatrix4(camObj.matrixWorld);this.j[i].position.copy(this.w[i]);this.j[i].scale.setScalar(this.jr[i]);}
@@ -1285,6 +1294,18 @@ class HandRig{
   const PA=this.palm.geometry.attributes.position,RING=[0,1,5,9,13,17];tv.subVectors(this.w[5],this.w[0]);tv2.subVectors(this.w[17],this.w[0]);tv3.crossVectors(tv,tv2).normalize().multiplyScalar(.009);
   this.palmC.set(0,0,0);for(const i of RING)this.palmC.add(this.w[i]);this.palmC.multiplyScalar(1/6);
   const sv=(k2,v,sg)=>PA.setXYZ(k2,v.x+tv3.x*sg,v.y+tv3.y*sg,v.z+tv3.z*sg);sv(0,this.palmC,1);sv(7,this.palmC,-1);RING.forEach((i,j)=>{sv(1+j,this.w[i],1);sv(8+j,this.w[i],-1);});PA.needsUpdate=true;this.palm.geometry.computeVertexNormals();
+  // shoulder sits below and beside the camera; the elbow is solved so the arm bends down and out naturally
+  const W0=this.cam[0];if(W0.x>.04)this.side=1;else if(W0.x<-.04)this.side=-1;
+  const S=new THREE.Vector3(this.side*.17,-.3,.06),dv=new THREE.Vector3().subVectors(W0,S),L=Math.max(.05,dv.length());dv.divideScalar(L);
+  let a=.29,b=.26;if(L>a+b-.005){const st=L/(a+b-.005);a*=st;b*=st;}
+  const al=Math.acos(clamp((a*a+L*L-b*b)/(2*a*L),-1,1));const hint=new THREE.Vector3(this.side*.6,-1,.25);hint.addScaledVector(dv,-hint.dot(dv)).normalize();
+  const E=S.clone().addScaledVector(dv,a*Math.cos(al)).addScaledVector(hint,a*Math.sin(al));
+  const Sw=S.applyMatrix4(camObj.matrixWorld),Ew=E.applyMatrix4(camObj.matrixWorld),Ww=this.w[0];
+  const seg=(mesh,p,q,from,to)=>{tv.subVectors(q,p);const len=tv.length();if(len<1e-4){mesh.visible=false;return;}mesh.visible=true;tv.divideScalar(len);mesh.position.copy(p).addScaledVector(tv,len*(from+to)/2);mesh.quaternion.setFromUnitVectors(UPV,tv);mesh.scale.set(1,len*(to-from),1);};
+  seg(this.upper,Sw,Ew,0,1);seg(this.fore,Ew,Ww,0,.97);this.elbow.position.copy(Ew);this.wristJ.position.copy(Ww);
+  this.upSl.visible=false;this.foreSl.visible=false;this.elbowSl.visible=false;
+  if(this.sleeve==='long'){seg(this.upSl,Sw,Ew,0,1);seg(this.foreSl,Ew,Ww,0,.86);this.elbowSl.visible=true;this.elbowSl.position.copy(Ew);}
+  else if(this.sleeve==='short')seg(this.upSl,Sw,Ew,0,.55);
  }
 }
 function getRig(i){while(HANDS.rigs.length<=i)HANDS.rigs.push(new HandRig());return HANDS.rigs[i];}
@@ -1818,7 +1839,7 @@ function renderCrRoster(){$('#crRoster').innerHTML=roster.map(c=>`<button class=
 function loadIntoCreator(cfg){cr.isNew=!cfg;cr.draft=cfg?clone(cfg):randomCfg();cr.changed=!cfg;cr.dirty=true;$('#crConfirm').hidden=true;renderControls();renderCrRoster();updateCrTitle();}
 $('#crRoster').addEventListener('click',e=>{const b=e.target.closest('.chip');if(!b)return;if(b.dataset.new){loadIntoCreator(null);return;}loadIntoCreator(roster.find(c=>c.id===b.dataset.id));});
 $('#crSave').addEventListener('click',()=>{
- if(cr.me){ME={...clone(cr.draft),id:'me'};saveMe();if(gps.player)gps.player.setCfg(clone(ME));for(const r of HANDS.rigs)r.mat.color.set(SKIN[ME.skin]??SKIN[3]);
+ if(cr.me){ME={...clone(cr.draft),id:'me'};saveMe();if(gps.player)gps.player.setCfg(clone(ME));for(const r of HANDS.rigs)r.applyMe();
   cr.changed=false;updateCrTitle();cr.preview.act='wave';cr.preview.actT=cr.preview.actDur=2;beep(700,.07);toast('Saved your character.');return;}
  const d=clone(cr.draft);if(!d.name||d.name==='New person')d.name=pick(NAMES);cr.draft.name=d.name;
  const i=roster.findIndex(c=>c.id===d.id);if(i>=0)roster[i]=d;else roster.push(d);saveRoster();
