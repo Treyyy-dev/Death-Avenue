@@ -169,10 +169,10 @@ input[type=text]{width:100%;background:var(--raise);border:1px solid var(--line)
     <div class="menu-card">
       <p class="eyebrow">Life-size AR people</p>
       <h1>Room<br><span>Mates</span></h1>
-      <p class="lede">Design people from head to sneakers, drop them into your room at real height, and watch them wander, sit down and react when you walk into them.</p>
+      <p class="lede">Design people from head to sneakers and hang out with them in a life-size room. Move your phone to look around, walk up to them, and watch them wander, sit down and react when you bump into them.</p>
       <div class="menu-actions">
-        <button id="btnAR" class="btn primary"><span>Start AR<br><small>Use your camera</small></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8V5a2 2 0 0 1 2-2h3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M8 21H5a2 2 0 0 1-2-2v-3"/><circle cx="12" cy="12" r="3.5"/></svg></button>
-        <button id="btnDemo" class="btn"><span>Play in the demo room<br><small>No camera needed</small></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg></button>
+        <button id="btnAR" class="btn primary"><span>Start AR<br><small>Move your phone to look around</small></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8V5a2 2 0 0 1 2-2h3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M8 21H5a2 2 0 0 1-2-2v-3"/><circle cx="12" cy="12" r="3.5"/></svg></button>
+        <button id="btnDemo" class="btn"><span>Touch controls<br><small>Drag to look, stick to walk</small></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg></button>
         <button id="btnCreate" class="btn ghost"><span>Create people</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7" r="4"/><path d="M4 21c1-4.5 4.5-6.5 8-6.5s7 2 8 6.5"/></svg></button>
       </div>
       <p id="support" class="fine">Checking what your phone supports…</p>
@@ -184,7 +184,7 @@ input[type=text]{width:100%;background:var(--raise);border:1px solid var(--line)
       <button id="btnExit" class="icon-btn glass block" aria-label="Back to menu"></button>
       <div id="status" class="pill glass block"><i class="dot"></i><span></span></div>
     </header>
-    <div class="tools block">
+    <div class="tools block" hidden>
       <button class="tool glass on" data-tool="place" id="toolPlace"></button>
       <button class="tool glass" data-tool="seat" id="toolSeat"></button>
       <button class="tool glass" id="toolScan"></button>
@@ -857,41 +857,35 @@ function spawnPerson(cfg,x,z,h=0){const p=new Person(clone(cfg));p.pos.set(x,z);
 function setupDemoWorld(){clearPeople();clearSeatMarkers();W.map=DEMO_MAP;W.seats=DEMO_SEATS.map(s=>({...s,occ:null}));W.floorY=0;
  const spots=[[-.8,.4],[.9,-.1],[.2,1.3]];roster.slice(0,3).forEach((c,i)=>{const p=spawnPerson(c,spots[i][0],spots[i][1],rand(-3,3));p.timer=rand(.5,2.5);});}
 function applyLook(){
- const xrm=mode==='xr',cam=mode==='cam',demo=mode==='demo'||mode==='menu';
- room.visible=demo;shadowPlane.visible=xrm||cam;video.style.display=cam?'block':'none';
- world.background=demo?new THREE.Color('#14161c'):null;
- hemi.intensity=demo?.35:.85;sun.intensity=demo?2.4:1.7;
+ room.visible=true;shadowPlane.visible=false;video.style.display='none';
+ world.background=new THREE.Color('#14161c');hemi.intensity=.35;sun.intensity=2.4;
  reticle.visible=false;dots.visible=false;
- $('#stick').hidden=!(demo||cam);$('#toolSeat').hidden=demo;$('#toolScan').hidden=!xrm;
+ $('#stick').hidden=!(mode==='demo'||mode==='motion');
 }
 function showScreen(s){$('#menu').hidden=s!=='menu';$('#hud').hidden=s!=='hud';$('#creator').hidden=s!=='creator';$('#labels').hidden=s!=='hud';}
 function enterMenu(){mode='menu';W.mode='menu';setupDemoWorld();applyLook();showScreen('menu');closeSheet();}
-function enterDemo(){mode='demo';W.mode='demo';camera.fov=65;camera.updateProjectionMatrix();camera.position.set(0,1.6,1.9);look.yaw=0;look.pitch=-.15;applyLook();setTool('place');showScreen('hud');renderTray();
- if(!W.people.length)setupDemoWorld();toastOnce('demo','Drag to look around, use the stick to walk. Try walking into someone.');}
-async function startAR(){initAudio();if(W.xrOK){await startXR();}else await startCam();}
-async function startCam(){
+function enterRoom(kind){mode=kind;W.mode=kind;camera.fov=kind==='motion'?62:65;camera.updateProjectionMatrix();camera.position.set(0,1.6,1.9);look.yaw=0;look.pitch=-.15;ori.offset=null;
+ applyLook();setTool('place');showScreen('hud');renderTray();if(!W.people.length)setupDemoWorld();
+ toastOnce(kind,kind==='motion'?'Move your phone to look around and use the stick to walk. Try walking into someone.':'Drag to look around and use the stick to walk. Try walking into someone.');}
+function enterDemo(){enterRoom('demo');}
+async function startAR(){initAudio();if(W.xrOK)await startXR();else await startMotion();}
+async function startMotion(){
  try{if(typeof DeviceOrientationEvent!=='undefined'&&typeof DeviceOrientationEvent.requestPermission==='function')await DeviceOrientationEvent.requestPermission().catch(()=>{});}catch(e){}
- try{
-  const stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1280},height:{ideal:1920}},audio:false});
-  camStream=stream;video.srcObject=stream;await video.play().catch(()=>{});
-  mode='cam';W.mode='cam';clearPeople();clearSeatMarkers();W.seats=[];W.map=makeDiscMap(5);W.floorY=0;
-  camera.fov=62;camera.updateProjectionMatrix();camera.position.set(0,1.45,0);look.yaw=0;look.pitch=-.35;ori.offset=null;
-  applyLook();setTool('place');showScreen('hud');renderTray();
-  toastOnce('cam','Turn your phone to look around. Tap the floor to place someone, then walk with the stick.');
- }catch(e){toast("Your camera isn't available here, so you're in the demo room.");enterDemo();}
+ enterRoom('motion');
 }
 function stopCam(){if(camStream){camStream.getTracks().forEach(t=>t.stop());camStream=null;}video.srcObject=null;}
 async function startXR(){
  try{
-  const session=await navigator.xr.requestSession('immersive-ar',{requiredFeatures:['hit-test'],optionalFeatures:['dom-overlay'],domOverlay:{root:$('#ui')}});
+  const session=await navigator.xr.requestSession('immersive-ar',{optionalFeatures:['dom-overlay','local-floor'],domOverlay:{root:$('#ui')}});
   renderer.xr.setReferenceSpaceType('local');await renderer.xr.setSession(session);
-  xr.session=session;xr.ref=renderer.xr.getReferenceSpace();xr.viewer=await session.requestReferenceSpace('viewer');xr.sources=[];
-  const rays=[[0,0],[-.32,-.28],[.32,-.28],[0,-.55],[-.22,.18],[.22,.18],[0,-.25]];
-  for(const[dx,dy]of rays){try{xr.sources.push(await session.requestHitTestSource({space:xr.viewer,offsetRay:new XRRay({x:0,y:0,z:0,w:1},{x:dx,y:dy,z:-1,w:0})}));}catch(e){}}
-  session.addEventListener('end',onXREnd);
-  mode='xr';W.mode='xr';clearPeople();clearSeatMarkers();W.seats=[];W.map=new FloorMap();W.floorY=0;xr.floorY=null;xr.votes=[];xr.lower=0;
-  applyLook();dots.visible=W.showDots;setTool('place');showScreen('hud');renderTray();
- }catch(e){toast("Full AR didn't start, so camera mode is on instead.");await startCam();}
+  let base,floor=true;try{base=await session.requestReferenceSpace('local-floor');}catch(e){floor=false;base=await session.requestReferenceSpace('local');}
+  // put you in the room behind the rug, facing the couch; your real movement moves you through it
+  xr.ref=base.getOffsetReferenceSpace(new XRRigidTransform({x:0,y:floor?0:-1.45,z:-1.9}));renderer.xr.setReferenceSpace(xr.ref);
+  xr.session=session;xr.sources=[];session.addEventListener('end',onXREnd);
+  mode='xr';W.mode='xr';if(!W.people.length)setupDemoWorld();
+  applyLook();setTool('place');showScreen('hud');renderTray();
+  toastOnce('xr','Walk around and move your phone to look. Tap the floor to send people places.');
+ }catch(e){toast("Motion tracking didn't start here, so turning your phone steers instead.");await startMotion();}
 }
 function onXREnd(){xr.sources.forEach(s=>{try{s.cancel();}catch(e){}});xr.session=null;xr.sources=[];renderer.setSize(innerWidth,innerHeight,false);if(mode==='xr')enterMenu();}
 function exitToMenu(){if(cr.open)closeCreator(true);if(xr.session){mode='menu';xr.session.end();enterMenu();return;}stopCam();enterMenu();}
@@ -902,22 +896,11 @@ const qView=new THREE.Quaternion();
 ctrl.addEventListener('select',()=>{
  if(mode!=='xr'||cr.open)return;
  m4.identity().extractRotation(ctrl.matrixWorld);raycaster.ray.origin.setFromMatrixPosition(ctrl.matrixWorld);raycaster.ray.direction.set(0,0,-1).applyMatrix4(m4);
- const c=xr.center;const floorPt=(c&&xr.floorY!=null&&c.kind==='floor')?c.pos.clone():null;
- handleTap(raycaster.ray,floorPt,c?{pos:c.pos,h:c.pos.y-W.floorY}:null);
+ tapRay(raycaster.ray.clone());
 });
 function xrFrame(frame){
  if(!frame||!xr.ref)return;const pose=frame.getViewerPose(xr.ref);
  if(pose){const p=pose.transform.position,o=pose.transform.orientation;W.player.set(p.x,p.y,p.z);xr.fwd.set(0,0,-1).applyQuaternion(qView.set(o.x,o.y,o.z,o.w));}
- xr.center=null;
- xr.sources.forEach((src,i)=>{const res=frame.getHitTestResults(src);if(!res.length)return;const hp=res[0].getPose(xr.ref);if(!hp)return;
-  m4.fromArray(hp.transform.matrix);const pos=new THREE.Vector3().setFromMatrixPosition(m4);const horiz=m4.elements[5]>.88;const kind=classifyHit(pos,horiz);
-  if(i===0)xr.center={pos,horiz,kind,q:new THREE.Quaternion().setFromRotationMatrix(m4)};});
- const c=xr.center;
- if(c&&!cr.open){reticle.visible=true;reticle.position.copy(c.pos);reticle.quaternion.copy(c.q);
-  const h=c.pos.y-W.floorY,seatish=xr.floorY!=null&&c.horiz&&h>.22&&h<.85;
-  retMat.color.set(xr.floorY==null?'#ffffff':W.tool==='seat'?(seatish?'#ffb36b':'#8a8f9c'):(c.kind==='floor'?'#72e6c6':'#8a8f9c'));}
- else reticle.visible=false;
- xr.dotT-=1/60;if(xr.dotT<=0){xr.dotT=.3;updateDots();}
 }
 function classifyHit(pos,horiz){
  const camY=W.player.y;
@@ -951,7 +934,7 @@ const stick={x:0,y:0,id:null};
 function movePlayer(dt){
  if(!stick.x&&!stick.y)return;camera.getWorldDirection(tv);tv.y=0;if(tv.lengthSq()<1e-4)return;tv.normalize();
  const f=-stick.y,r=stick.x,sp=1.5;camera.position.x+=(tv.x*f-tv.z*r)*sp*dt;camera.position.z+=(tv.z*f+tv.x*r)*sp*dt;
- if(mode==='demo'){const P=camera.position;P.x=clamp(P.x,-2.95,2.95);P.z=clamp(P.z,-2.95,2.95);
+ if(mode==='demo'||mode==='motion'){const P=camera.position;P.x=clamp(P.x,-2.95,2.95);P.z=clamp(P.z,-2.95,2.95);
   for(const r2 of OBST){const x0=r2[0]-.22,x1=r2[1]+.22,z0=r2[2]-.22,z1=r2[3]+.22;if(P.x>x0&&P.x<x1&&P.z>z0&&P.z<z1){const dl=[P.x-x0,x1-P.x,P.z-z0,z1-P.z],m=Math.min(...dl);if(m===dl[0])P.x=x0;else if(m===dl[1])P.x=x1;else if(m===dl[2])P.z=z0;else P.z=z1;}}}
  else if(mode==='cam'){const P=camera.position,d=Math.hypot(P.x,P.z);if(d>4.5){P.x*=4.5/d;P.z*=4.5/d;}}
 }
@@ -966,12 +949,12 @@ function checkBumps(){
  }
 }
 function updateSun(){
- if(mode==='demo'||mode==='menu'){sun.position.set(4.5,6,1.5);sun.target.position.set(0,0,-.4);return;}
+ if(room.visible){sun.position.set(4.5,6,1.5);sun.target.position.set(0,0,-.4);return;}
  let cx=0,cz=0,n=0;for(const p of W.people){cx+=p.pos.x;cz+=p.pos.y;n++;}if(n){cx/=n;cz/=n;}else{cx=W.player.x;cz=W.player.z;}
  sun.target.position.set(cx,W.floorY,cz);sun.position.set(cx+1.2,W.floorY+5,cz+1.8);shadowPlane.position.y=W.floorY+.001;
 }
 function updateWorld(dt,t,frame){
- if(mode==='xr')xrFrame(frame);else if(mode==='cam')camFrame(dt);else if(mode==='demo')demoFrame(dt);else if(mode==='menu')menuFrame(t);
+ if(mode==='xr')xrFrame(frame);else if(mode==='motion')camFrame(dt);else if(mode==='demo')demoFrame(dt);else if(mode==='menu')menuFrame(t);
  if(mode!=='xr'){camera.getWorldPosition(W.player);}
  t2.set((W.player.x-W.pprev.x)/dt,(W.player.z-W.pprev.y)/dt);if(t2.length()>8)t2.set(0,0);W.pvel.lerp(t2,1-Math.exp(-10*dt));W.pprev.set(W.player.x,W.player.z);
  for(const p of W.people)p.update(dt,t);
@@ -985,20 +968,19 @@ function updateWorld(dt,t,frame){
 /* ================= taps & commands ================= */
 function rayPlane(ray,y){if(Math.abs(ray.direction.y)<1e-4)return null;const t=(y-ray.origin.y)/ray.direction.y;if(t<.2||t>15)return null;return ray.origin.clone().addScaledVector(ray.direction,t);}
 function screenTap(x,y){
- if(!(mode==='demo'||mode==='cam')||cr.open)return;
- raycaster.setFromCamera(t2.set(x/innerWidth*2-1,-(y/innerHeight)*2+1),camera);const ray=raycaster.ray.clone();
- let fp=rayPlane(ray,W.floorY);if(fp&&mode==='demo'&&(Math.abs(fp.x)>2.95||Math.abs(fp.z)>2.95))fp=null;
- const sp=rayPlane(ray,W.floorY+.45);handleTap(ray,fp,sp?{pos:sp,h:.45}:null);
+ if(!(mode==='demo'||mode==='motion')||cr.open)return;
+ raycaster.setFromCamera(t2.set(x/innerWidth*2-1,-(y/innerHeight)*2+1),camera);tapRay(raycaster.ray.clone());
 }
+function tapRay(ray){let fp=rayPlane(ray,W.floorY);if(fp&&(Math.abs(fp.x)>2.95||Math.abs(fp.z)>2.95))fp=null;handleTap(ray,fp,null);}
 function handleTap(ray,floorPt,seatInfo){
  raycaster.ray.copy(ray);const hits=raycaster.intersectObjects(W.people.map(p=>p.proxy),false);
  if(hits.length){const p=hits[0].object.userData.person;if(W.selected===p)closeSheet();else selectPerson(p);return;}
  if(W.tool==='seat'){markSeat(seatInfo);return;}
  if(W.selected){const p=W.selected;if(!floorPt){toast('Aim at the floor to send them there.');return;}
-  if(mode==='demo'&&!W.map.walkableXZ(floorPt.x,floorPt.z)){toast("There's furniture there.");return;}
+  if(!W.map.walkableXZ(floorPt.x,floorPt.z)){toast("There's furniture there.");return;}
   p.follow=false;p.queue(()=>{if(!p.goTo(floorPt.x,floorPt.z))toast(`${p.cfg.name} can't find a way there yet.`);});showPing(floorPt);refreshSheet();return;}
- if(!floorPt){toast(mode==='xr'?(xr.floorY==null?'Sweep your phone over the floor first.':'Point the circle at open floor.'):'Tap on open floor.');return;}
- if(mode==='demo'&&!W.map.walkableXZ(floorPt.x,floorPt.z)){toast("There's furniture there. Pick open floor.");return;}
+ if(!floorPt){toast('Tap on open floor.');return;}
+ if(!W.map.walkableXZ(floorPt.x,floorPt.z)){toast("There's furniture there. Pick open floor.");return;}
  placeAt(floorPt);
 }
 function placeAt(pt){
@@ -1006,7 +988,6 @@ function placeAt(pt){
  const ex=W.people.find(p=>p.cfg.id===cfg.id);
  if(ex){ex.follow=false;ex.queue(()=>ex.goTo(pt.x,pt.z));ex.say('On my way!');showPing(pt);return;}
  if(W.people.length>=8){toast('Eight people max. Remove someone to add more.');return;}
- if(mode==='xr'){W.map.markFloor(pt.x,pt.z);for(let a=0;a<6.28;a+=.7)W.map.markFloor(pt.x+Math.cos(a)*.27,pt.z+Math.sin(a)*.27);}
  const p=spawnPerson(cfg,pt.x,pt.z);p.heading=p.angleTo(W.player.x,W.player.z);p.spawnT=0;p.say(pick(HELLO));p.startAct('wave',2.2);p.lookPlayer(3);
  beep(520,.06);renderTray();if(W.people.length===1)setTimeout(()=>toastOnce('bump','Walk right into them and see what happens.'),2600);
 }
@@ -1055,7 +1036,7 @@ function doAction(a){
   case'come':p.follow=false;p.queue(()=>{if(!p.goToPlayer(1,()=>{p.faceTarget=p.angleTo(W.player.x,W.player.z);p.lookPlayer(4);p.say(pick(["What's up?","You called?","I'm here.","Yeah?"]));p.startAct('wave',1.8);}))toast(`${p.cfg.name} can't find a way to you yet.`);});break;
   case'follow':p.follow=!p.follow;if(p.follow){p.queue(()=>{});p.say('Right behind you.');}else p.path=[];break;
   case'seat':{if(p.state==='sit'&&p.seat){toast(`${p.cfg.name} is already sitting.`);break;}const free=W.seats.filter(s=>!s.occ);
-   if(!free.length){toast(mode==='demo'?'Every seat is taken.':'Mark a seat first: pick Mark seat and aim at a chair.');break;}
+   if(!free.length){toast('Every seat is taken.');break;}
    free.sort((x,y)=>p.dist(x.x,x.z)-p.dist(y.x,y.z));p.follow=false;p.queue(()=>{p.stay=true;if(!p.trySit(free[0])){p.stay=false;toast("They can't reach a seat from here.");}});break;}
   case'wave':if(p.isSeated()){p.lookPlayer(3);p.startAct('wave',2);}else p.queue(()=>{p.faceTarget=p.angleTo(W.player.x,W.player.z);p.lookPlayer(3);p.startAct('wave',2.2);});break;
   case'dance':case'stretch':p.follow=false;p.queue(()=>{p.startAct(a,a==='dance'?8:3.2);if(a==='dance')p.say('♪ ♫');});break;
@@ -1083,7 +1064,7 @@ let ptr=null;
 canvas.addEventListener('pointerdown',e=>{if(ptr)return;ptr={id:e.pointerId,x:e.clientX,y:e.clientY,lx:e.clientX,ly:e.clientY,t:performance.now(),moved:false};canvas.setPointerCapture(e.pointerId);});
 canvas.addEventListener('pointermove',e=>{if(!ptr||e.pointerId!==ptr.id)return;const dx=e.clientX-ptr.lx,dy=e.clientY-ptr.ly;ptr.lx=e.clientX;ptr.ly=e.clientY;
  if(Math.hypot(e.clientX-ptr.x,e.clientY-ptr.y)>9)ptr.moved=true;
- if(ptr.moved&&(mode==='demo'||(mode==='cam'&&!ori.active))){look.yaw-=dx*.0045;look.pitch=clamp(look.pitch-dy*.0045,-1.2,1.1);}});
+ if(ptr.moved&&(mode==='demo'||(mode==='motion'&&!ori.active))){look.yaw-=dx*.0045;look.pitch=clamp(look.pitch-dy*.0045,-1.2,1.1);}});
 canvas.addEventListener('pointerup',e=>{if(!ptr||e.pointerId!==ptr.id)return;if(!ptr.moved&&performance.now()-ptr.t<450)screenTap(e.clientX,e.clientY);ptr=null;});
 canvas.addEventListener('pointercancel',()=>{ptr=null;});
 // keep XR taps on the UI from reaching the room
@@ -1142,7 +1123,7 @@ function openCreator(cfg){
  cr.inXR=mode==='xr';cr.isNew=!cfg;cr.draft=cfg?clone(cfg):randomCfg();cr.changed=!cfg;cr.rot=0;
  if(!cr.preview)cr.preview=new Person(clone(cr.draft),{preview:true});else cr.preview.setCfg(clone(cr.draft));
  const pv=cr.preview;pv.pos.set(0,0);pv.heading=0;pv.baseY=0;pv.state='idle';
- if(cr.inXR){const f=tv.copy(xr.fwd).setY(0);if(f.lengthSq()<1e-4)f.set(0,0,-1);f.normalize();pv.pos.set(W.player.x+f.x*1.7,W.player.z+f.z*1.7);pv.baseY=xr.floorY!=null?W.floorY:W.player.y-1.5;pv.heading=Math.atan2(W.player.x-pv.pos.x,W.player.z-pv.pos.y);world.add(pv.root);pv.lookOverride=W.player;}
+ if(cr.inXR){const f=tv.copy(xr.fwd).setY(0);if(f.lengthSq()<1e-4)f.set(0,0,-1);f.normalize();pv.pos.set(W.player.x+f.x*1.7,W.player.z+f.z*1.7);pv.baseY=W.floorY;pv.heading=Math.atan2(W.player.x-pv.pos.x,W.player.z-pv.pos.y);world.add(pv.root);pv.lookOverride=W.player;}
  else{cscene.add(pv.root);pv.lookOverride=ccam.position;}
  pv.lastX=pv.pos.x;pv.lastZ=pv.pos.y;cr.baseHeading=pv.heading;
  cr.open=true;cr.camY=pv.av.H*.52;cr.camD=4;closeSheet();
@@ -1220,9 +1201,7 @@ function renderCreator(dt,t){
 let statusT=0;
 function updateStatus(){
  const el=$('#status'),dot=el.firstChild,txt=el.lastChild;let k='ok',s;const n=roster[W.rosterSel]?.name||'someone';
- if(mode==='xr'&&xr.floorY==null){k='warn';s='Point at the floor and sweep slowly';}
- else if(W.tool==='seat'){k='seat';s=mode==='xr'?'Stand in front of a chair, aim at its seat, tap':'Tap the seat of a chair or couch';}
- else if(W.selected){k='sel';s=`${W.selected.cfg.name}: tap the floor to send them`;}
+ if(W.selected){k='sel';s=`${W.selected.cfg.name}: tap the floor to send them`;}
  else if(!W.people.length)s=`Tap the floor to place ${n}`;
  else s=`${W.people.length} in the room · tap someone to direct them`;
  dot.className='dot '+k;if(txt.textContent!==s)txt.textContent=s;refreshSheet();
@@ -1243,10 +1222,9 @@ addEventListener('resize',()=>{if(renderer.xr.isPresenting)return;renderer.setSi
 (async function boot(){
  enterMenu();
  let ok=false;try{ok=!!(navigator.xr&&await navigator.xr.isSessionSupported('immersive-ar'));}catch(e){}
- W.xrOK=ok;const camOK=!!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia);
- $('#support').textContent=ok?'Full AR is ready. Your phone maps the floor and furniture, so people stay grounded, sit on real seats and walk around obstacles.'
-  :camOK?'Camera mode: people appear through your camera and turn as you turn your phone. For real floor and furniture tracking, open this page in Chrome on an Android phone.'
-  :"This browser can't use the camera. The demo room works everywhere.";
+ W.xrOK=ok;
+ $('#support').textContent=ok?'Motion AR is ready: walk around your real space and the room moves with you.'
+  :'Turn and tilt your phone to look around the room, and use the stick to walk. For real walking, open this in Chrome on an Android phone.';
 })();
 </script>
 

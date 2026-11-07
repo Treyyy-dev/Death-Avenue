@@ -4,4 +4,4 @@ Design life-size people and drop them into your room with AR. They walk around, 
 
 Play: https://treyyy-dev.github.io/Roommates/
 
-Full AR (floor and furniture tracking) works in Chrome on Android. Other phones get camera mode, and every browser gets the demo room.
+You explore a life-size virtual room by moving your phone. In Chrome on Android you can physically walk around it; on other phones you turn the phone to look and use the stick to walk.
