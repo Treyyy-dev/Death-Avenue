@@ -1,0 +1,24 @@
+name: Fetch game art
+on:
+  push:
+    paths: ['art/sources.txt']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download art listed in art/sources.txt
+        run: |
+          while read -r name url; do
+            [ -z "$name" ] && continue
+            curl -fsSL "$url" -o "art/$name"
+          done < art/sources.txt
+      - name: Save it to the repo
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git add art
+          git diff --cached --quiet || (git commit -m "Add downloaded game art" && git push)
