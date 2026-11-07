@@ -102,6 +102,30 @@ h1 span{color:var(--accent)}
 .act svg{width:22px;height:22px}
 .act.on{background:var(--accent);color:var(--accent-ink);border-color:transparent}
 .act.danger{color:var(--danger)}
+.talk{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(150px + env(safe-area-inset-bottom,0px));display:grid;justify-items:center;gap:10px}
+#hud:has(#sheet:not([hidden])) .talk{bottom:calc(310px + env(safe-area-inset-bottom,0px))}
+#hud:has(#talkBar:not([hidden])) .talk,#hud:has(#aiSheet:not([hidden])) .talk{display:none}
+.mic{width:68px;height:68px;border-radius:50%;border:0;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;box-shadow:0 10px 26px rgba(0,0,0,.35);position:relative;padding:0}
+.mic svg{width:28px;height:28px}
+.mic.listening{background:#ff7a7a;color:#2a0d0d}
+.mic.listening::after{content:"";position:absolute;inset:-8px;border-radius:50%;border:3px solid rgba(255,122,122,.6);animation:ring 1.2s ease-out infinite}
+.mic.thinking{background:var(--raise);color:var(--fg);border:1px solid var(--line)}
+.mic.thinking svg{animation:pulse 1s infinite}
+.mic.speaking{background:var(--mint);color:#0b2a22}
+@keyframes ring{from{transform:scale(.9);opacity:1}to{transform:scale(1.35);opacity:0}}
+.kbd{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;padding:0}
+.kbd svg{width:21px;height:21px}
+#caption{position:fixed;left:max(12px,env(safe-area-inset-left,0px));right:calc(max(12px,env(safe-area-inset-right,0px)) + 76px);top:calc(66px + env(safe-area-inset-top,0px));border-radius:16px;padding:10px 14px;font:500 14.5px/1.4 var(--body);max-height:32vh;overflow:auto}
+#caption p{margin:0}#caption p+p{margin-top:6px}
+#caption b{font-weight:800;color:var(--accent);margin-right:6px}
+#caption .you b{color:var(--mint)}
+#talkBar{position:fixed;left:0;right:0;bottom:0;display:flex;gap:8px;align-items:center;background:var(--solid);border-top:1px solid var(--line);
+  padding:12px max(12px,env(safe-area-inset-right,0px)) calc(12px + env(safe-area-inset-bottom,0px)) max(12px,env(safe-area-inset-left,0px))}
+#talkBar input{flex:1;min-width:0}
+#aiSheet{position:fixed;left:0;right:0;bottom:0;border-radius:24px 24px 0 0;background:var(--solid);border-top:1px solid var(--line);display:grid;gap:12px;
+  padding:16px max(16px,env(safe-area-inset-right,0px)) calc(14px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+#aiSheet input{width:100%;background:var(--raise);border:1px solid var(--line);border-radius:12px;padding:13px 14px;font:600 16px var(--body);color:var(--fg)}
+.row{display:flex;gap:8px;flex-wrap:wrap}
 .menu-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .menu-grid .btn{padding:14px;font-size:15px}
 #stick2{bottom:calc(196px + env(safe-area-inset-bottom,0px))}
@@ -211,13 +235,29 @@ input[type=text]{width:100%;background:var(--raise);border:1px solid var(--line)
     </div>
     <div id="stick" class="block"><div id="knob"></div></div>
     <div id="tray" class="block">
-      <div class="tray-head"><span class="label">Tap the floor to place</span><button id="btnPeople" class="link">Edit people</button></div>
+      <div class="tray-head"><span class="label">Tap the floor to place</span><span><button id="btnAI" class="link">AI voice</button> <button id="btnPeople" class="link">Edit people</button></span></div>
       <div id="rosterChips" class="scroller"></div>
     </div>
     <div id="sheet" class="block" hidden>
       <div class="sheet-head"><span class="face" id="selFace"></span><div><strong id="selName"></strong><em id="selState"></em></div><button class="done" id="selClose">Done</button></div>
       <div class="acts" id="acts"></div>
       <p class="hint">Tap the floor to send them somewhere. Walk into them and they'll notice.</p>
+    </div>
+    <div class="talk block">
+      <button id="typeBtn" class="kbd glass" aria-label="Type to talk"></button>
+      <button id="micBtn" class="mic" aria-label="Talk to someone"></button>
+    </div>
+    <div id="caption" class="glass block" hidden></div>
+    <form id="talkBar" class="block" hidden>
+      <input id="talkInput" type="text" placeholder="Say something…" autocomplete="off" maxlength="300" aria-label="Message">
+      <button class="save" type="submit">Send</button>
+      <button class="done" type="button" id="talkClose">Close</button>
+    </form>
+    <div id="aiSheet" class="block" hidden>
+      <div class="sheet-head"><div><strong>Give your people a voice</strong><em>One-time setup</em></div><button class="done" id="aiClose" type="button">Close</button></div>
+      <p class="hint" id="aiText">Conversations run on Claude. Paste a Claude API key from console.anthropic.com below. It's saved only on this phone and sent straight to Anthropic. Each reply costs a fraction of a cent on your API account.</p>
+      <input type="password" id="aiKey" placeholder="sk-ant-…" autocomplete="off" aria-label="Claude API key">
+      <div class="row"><button class="save" id="aiSave" type="button">Save key</button><button class="done" id="aiForget" type="button">Remove key</button></div>
     </div>
   </section>
 
@@ -292,6 +332,10 @@ const IC={
  scan:'<path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3"/><path d="M4 12h16"/>',
  come:'<path d="M12 4v15M6 13l6 6 6-6"/>',
  follow:'<path d="M5 19l4-4M9 15V9.5M9 9.5h5.5M19 5l-4 4"/><circle cx="16.5" cy="7.5" r="0"/><path d="M14 13l3 3-3 3"/>',
+ mic:'<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>',
+ kbd:'<rect x="3" y="6" width="18" height="12" rx="2"/><path d="M7 10h.01M11 10h.01M15 10h.01M7 14h10"/>',
+ stop:'<rect x="7" y="7" width="10" height="10" rx="2"/>',
+ dots:'<circle cx="6" cy="12" r="1.6" fill="currentColor"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/><circle cx="18" cy="12" r="1.6" fill="currentColor"/>',
  hand:'<path d="M7 12V6.5a1.5 1.5 0 0 1 3 0V11M10 10.5V4.5a1.5 1.5 0 0 1 3 0v6M13 10.5V5.5a1.5 1.5 0 0 1 3 0v6M16 11.5V8.5a1.5 1.5 0 0 1 3 0V15c0 3.9-2.6 6.5-6.5 6.5-2.7 0-4.3-1.4-5.7-3.7L4.3 13.4a1.5 1.5 0 0 1 2.5-1.6L7 12"/>',
  wave:'<path d="M8 13V6.5a1.5 1.5 0 0 1 3 0V12M11 11V4.5a1.5 1.5 0 0 1 3 0V11M14 11V6a1.5 1.5 0 0 1 3 0v7.5c0 4-2.5 6.5-6 6.5-2.8 0-4.4-1.6-5.8-4.2L3.5 12.6a1.5 1.5 0 0 1 2.4-1.7L8 13"/>',
  dance:'<path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/>',
@@ -668,7 +712,7 @@ class Person{
   this.animate(dt,t);
  }
  think(dt){
-  this.bumpCD-=dt;this.sitCD-=dt;this.touchCD-=dt;this.flinch=Math.max(0,this.flinch-dt);
+  this.bumpCD-=dt;this.sitCD-=dt;this.touchCD-=dt;this.chatHold=Math.max(0,(this.chatHold||0)-dt);this.flinch=Math.max(0,this.flinch-dt);
   if(this.bubbleT>0)this.bubbleT-=dt;if(this.talkT>0)this.talkT-=dt;
   if(this.sayQ){this.sayQ.t-=dt;if(this.sayQ.t<=0){this.say(this.sayQ.text);this.sayQ=null;}}
   if(this.queueAct){this.queueAct.t-=dt;if(this.queueAct.t<=0){const q=this.queueAct;this.queueAct=null;if(this.state==='listen'||this.state==='idle')this.startAct(q.name,q.dur);}}
@@ -677,6 +721,7 @@ class Person{
   if(this.faceTarget!=null&&(this.state==='idle'||this.state==='act'||this.state==='listen')){this.turnTo(this.faceTarget,dt,3.6);if(Math.abs(angDiff(this.heading,this.faceTarget))<.04)this.faceTarget=null;}
   switch(this.state){
    case'idle':
+    if(this.chatHold>0&&!this.pending){if(this.lookMode!=='player')this.lookPlayer(2);break;}
     if(this.follow){this.followTick(dt);break;}
     if(this.pending){const f=this.pending;this.pending=null;f();break;}
     this.timer-=dt;if(this.timer<=0)this.decide();break;
@@ -696,7 +741,7 @@ class Person{
    this.timer-=dt;
    if(this.sitAct){this.sitActT-=dt;if(this.sitActT<=0)this.sitAct=null;}
    else{this.sitActCD-=dt;if(this.sitActCD<=0){this.sitActCD=rand(4,9);const r=Math.random();if(r<.35)this.startAct('phone',rand(3,6));else if(r<.5&&this.distPlayer()<4&&W.mode!=='menu'){this.lookPlayer(3);this.startAct('wave',1.8);}else{this.lookMode='scan';this.lookTimer=rand(2,3);this.scanYaw=rand(-1,1);this.scanPitch=rand(-.2,.1);}}}
-   if(this.timer<=0||this.pending)this.sp='rise';
+   if((this.timer<=0&&!(this.chatHold>0))||this.pending)this.sp='rise';
   }
   else if(this.sp==='rise'){this.sitAct=null;this.sitT=Math.max(0,this.sitT-dt/.95);if(this.sitT<=0)this.sp='out';}
   else if(this.sp==='out'){const ax=st.x+f.x*.95,az=st.z+f.y*.95,dx=ax-this.pos.x,dz=az-this.pos.y,d=Math.hypot(dx,dz);
@@ -938,7 +983,7 @@ async function startXR(){
  }catch(e){toast("Motion tracking didn't start here, so turning your phone steers instead.");await startMotion();}
 }
 function onXREnd(){setHands(false);xr.binding=null;xr.sources.forEach(s=>{try{s.cancel();}catch(e){}});xr.session=null;xr.sources=[];renderer.setSize(innerWidth,innerHeight,false);if(mode==='xr')enterMenu();}
-function exitToMenu(){setHands(false);if(cr.open)closeCreator(true);if(xr.session){mode='menu';xr.session.end();backOut();return;}stopCam();backOut();}
+function exitToMenu(){setHands(false);stopTalk();caption(null);$('#talkBar').hidden=true;$('#aiSheet').hidden=true;if(cr.open)closeCreator(true);if(xr.session){mode='menu';xr.session.end();backOut();return;}stopCam();backOut();}
 function backOut(){if(W.fromGps){W.fromGps=false;enterGps();}else enterMenu();}
 
 /* ================= per-frame world ================= */
@@ -1249,6 +1294,125 @@ function updateHands(dt){
 $('#toolHands').addEventListener('click',()=>{initAudio();setHands(!HANDS.on);});
 $('#toolSkin').addEventListener('click',()=>{HANDS.skin=(HANDS.skin+1)%SKIN.length;try{localStorage.setItem('roommates.handSkin',String(HANDS.skin));}catch(e){}for(const r of HANDS.rigs)r.mat.color.set(SKIN[HANDS.skin]);renderHandButtons();});
 renderHandButtons();
+
+/* ================= talking ================= */
+const TALK={rec:null,listening:false,busy:false,handsFree:false,target:null,hist:new Map(),sample:undefined,empty:0,abort:null,voices:[]};
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+const VIBE_TXT={homebody:'calm, cozy and a little shy, with a dry sense of humor',social:'friendly, chatty and curious about people',hyper:'high-energy, playful and excitable, quick to joke'};
+const TOP_TXT={tee:'a t-shirt',longsleeve:'a long-sleeve shirt',hoodie:'a hoodie',tank:'a tank top',jacket:'a jacket over a shirt'};
+async function getSample(){if(TALK.sample!==undefined)return TALK.sample;try{TALK.sample=(window.claude&&typeof window.claude.use==='function')?await window.claude.use('sample'):null;}catch(e){TALK.sample=null;}return TALK.sample;}
+function aiKey(){try{return localStorage.getItem('roommates.claudeKey')||'';}catch(e){return '';}}
+function loadVoices(){try{TALK.voices=speechSynthesis.getVoices().filter(v=>/^en/i.test(v.lang));}catch(e){}}
+if('speechSynthesis' in window){loadVoices();speechSynthesis.addEventListener?.('voiceschanged',loadVoices);}
+function voiceFor(cfg){
+ const V=TALK.voices;if(!V.length)return null;const h=hashStr(String(cfg.id));
+ const fem=/samantha|victoria|karen|moira|tessa|fiona|serena|zira|susan|female|ava|allison|kate|google us english$/i,masc=/daniel|alex|fred|david|mark|tom|oliver|arthur|male|aaron|guy|rishi|google uk english male/i;
+ const want=cfg.frame==='fem'?V.filter(v=>fem.test(v.name)&&!/\bmale\b/i.test(v.name)):cfg.frame==='masc'?V.filter(v=>masc.test(v.name)):V;
+ const pool=want.length?want:V;return pool[h%pool.length];
+}
+function speak(p,text,done){
+ const finish=()=>{p.talkT=0;p.bubbleT=2.5;done&&done();};
+ if(!('speechSynthesis' in window)){p.talkT=999;setTimeout(finish,600+text.length*55);return;}
+ try{speechSynthesis.cancel();}catch(e){}
+ const u=new SpeechSynthesisUtterance(text),c=p.cfg,h=hashStr(String(c.id));const v=voiceFor(c);if(v)u.voice=v;
+ u.pitch=clamp((c.frame==='fem'?1.18:c.frame==='masc'?.86:1.02)+((h%17)-8)*.012-(c.height-175)*.004,.5,1.8);
+ u.rate=c.vibe==='hyper'?1.1:c.vibe==='homebody'?.94:1.02;
+ let ended=false;const end=()=>{if(ended)return;ended=true;finish();};u.onend=end;u.onerror=end;
+ p.talkT=999;speechSynthesis.speak(u);setTimeout(end,4000+text.length*90);
+}
+function setMic(st){const b=$('#micBtn');b.className='mic'+(st&&st!=='idle'?' '+st:'');b.innerHTML=svg(st==='listening'||st==='speaking'?'stop':st==='thinking'?'dots':'mic');
+ b.setAttribute('aria-label',st==='idle'?'Talk to someone':'Stop talking');}
+function caption(lines){const el=$('#caption');if(!lines){el.hidden=true;return;}el.hidden=false;el.innerHTML=lines.map(([who,t,you])=>`<p class="${you?'you':''}"><b>${esc(who)}</b>${esc(t)}</p>`).join('');el.scrollTop=el.scrollHeight;}
+function pickTalkTarget(){
+ if(W.selected)return W.selected;camera.getWorldDirection(tv);const fx=tv.x,fz=tv.z,fl=Math.hypot(fx,fz)||1;let best=null,bs=1e9;
+ for(const p of W.people){const bx=p.isSeatedLocked()&&p.seat?p.seat.x:p.pos.x,bz=p.isSeatedLocked()&&p.seat?p.seat.z:p.pos.y,dx=bx-W.player.x,dz=bz-W.player.z,d=Math.hypot(dx,dz);
+  if(d>6)continue;const ang=Math.acos(clamp((dx*fx+dz*fz)/(d*fl||1),-1,1));const sc=d*(1+ang*1.6);if(sc<bs){bs=sc;best=p;}}
+ return best;
+}
+function activityOf(p){
+ if(p.state==='sit'&&p.seat){const s=p.seat;return s.x<-2?'sitting in the armchair':s.x>2.5?'sitting on the bench by the window':'sitting on the couch';}
+ if(p.state==='act')return({dance:'dancing',phone:'scrolling on your phone',stretch:'stretching',wave:'waving',talk:'chatting'})[p.act]||'hanging out';
+ if(p.state==='walk')return 'walking around the room';return 'standing around the room';
+}
+function personaFor(p){
+ const c=p.cfg,others=W.people.filter(o=>o!==p).map(o=>o.cfg.name),me=ME.name&&ME.name!=='You'?ME.name:'the player';
+ const hair=c.hair==='bald'?'a shaved head':`${c.hair==='buzz'?'a buzz cut':c.hair+' hair'}`;
+ return `You are ${c.name}, a life-size person living in a cozy shared room in the game "Room Mates". ${me} is standing in the room talking to you out loud, and your reply will be read aloud by text-to-speech.
+About you: about ${c.height} cm tall, with ${hair}, wearing ${TOP_TXT[c.top]||'casual clothes'}${(c.extras||[]).length?' and '+c.extras.join(', '):''}. Your personality: ${VIBE_TXT[c.vibe]||VIBE_TXT.social}.
+Right now you are ${activityOf(p)}.${others.length?' Also in the room: '+others.join(', ')+'.':''}
+How to reply: stay in character as ${c.name}, warm and casual. Answer any question or topic ${me==='the player'?'they':me} brings up honestly and helpfully, the way a smart friend would. Keep it short, one to three spoken sentences, unless they ask for more. Use plain spoken words only: no emojis, lists, stage directions or markdown.`;
+}
+async function askAI(p,text,signal){
+ const hist=TALK.hist.get(p)||[];hist.push({role:'user',content:text});while(hist.length>14)hist.shift();if(hist[0].role!=='user')hist.shift();TALK.hist.set(p,hist);
+ const sample=await getSample();let reply;
+ if(sample){const r=await sample([{role:'user',content:personaFor(p)},...hist],{modelTier:'quick',cache:false,signal});reply=r.text;}
+ else{const key=aiKey();if(!key)throw{code:'no_ai'};
+  const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',signal,headers:{'content-type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+   body:JSON.stringify({model:'claude-haiku-5-5',max_tokens:300,system:personaFor(p),messages:hist})});
+  if(!r.ok)throw{code:r.status===401||r.status===403?'bad_key':r.status===429?'rate_limited':r.status===400?'bad_request':'upstream_error'};
+  const j=await r.json();reply=(j.content||[]).filter(x=>x.type==='text').map(x=>x.text).join(' ');}
+ reply=String(reply||'').replace(/[*_#`]/g,'').replace(/\s+/g,' ').trim()||'Hmm.';
+ hist.push({role:'assistant',content:reply});return reply;
+}
+function engage(p){TALK.target=p;p.chatHold=20;p.lookPlayer(20);if(!p.isSeatedLocked()){p.follow=false;p.queue(()=>{p.faceTarget=p.angleTo(W.player.x,W.player.z);});}}
+async function sendLine(text){
+ let p=TALK.target&&W.people.includes(TALK.target)?TALK.target:pickTalkTarget();
+ if(!p){toast('Walk up to someone and face them to talk.');stopTalk();return;}
+ engage(p);TALK.busy=true;setMic('thinking');TALK.lines=[[ME.name&&ME.name!=='You'?ME.name:'You',text,true]];caption(TALK.lines);p.say('…',999);
+ TALK.abort=new AbortController();
+ try{
+  const reply=await askAI(p,text,TALK.abort.signal);if(!TALK.busy)return;
+  TALK.lines.push([p.cfg.name,reply]);caption(TALK.lines);p.say(reply.length>110?reply.slice(0,108).replace(/\s\S*$/,'')+'…':reply,999);
+  if(!p.isSeatedLocked()&&p.state==='idle')p.startAct('talk',Math.min(12,1.5+reply.length*.06));
+  setMic('speaking');
+  speak(p,reply,()=>{p.chatHold=20;if(!TALK.busy)return;TALK.busy=false;setMic('idle');if(TALK.handsFree)listen();});
+ }catch(e){
+  TALK.busy=false;setMic('idle');p.bubbleT=0;const code=e&&e.code;if(code==='cancelled')return;TALK.handsFree=false;
+  if(code==='no_ai'){openAISheet();return;}
+  if(code==='bad_key'){toast("That API key didn't work. Check it in AI voice.");openAISheet();return;}
+  if(code==='not_granted'||code==='sampling_disabled')toast('Claude access was declined for this page, so people can only wave for now.');
+  else if(code==='rate_limited')toast('Too many messages at once. Wait a moment and try again.');
+  else if(code==='refused'){p.say("I'd rather not talk about that.");}
+  else toast("Couldn't reach Claude. Check your connection and try again.");
+ }
+}
+function listen(){
+ if(!SR){openTalkBar("Voice input isn't supported in this browser, so type instead.");TALK.handsFree=false;return;}
+ const r=new SR();r.lang=navigator.language||'en-US';r.interimResults=true;r.continuous=false;r.maxAlternatives=1;let fin='',blocked=false;
+ r.onresult=e=>{let inter='';for(let i=e.resultIndex;i<e.results.length;i++){const t=e.results[i][0].transcript;if(e.results[i].isFinal)fin+=t;else inter+=t;}
+  caption([[ME.name&&ME.name!=='You'?ME.name:'You',(fin+inter).trim()||'…',true]]);};
+ r.onerror=e=>{if(e.error==='not-allowed'||e.error==='service-not-allowed'){blocked=true;TALK.handsFree=false;openTalkBar("The microphone isn't available here, so type instead.");}};
+ r.onend=()=>{TALK.listening=false;TALK.rec=null;if(blocked){setMic('idle');return;}
+  if(fin.trim()){TALK.empty=0;sendLine(fin.trim());}
+  else{TALK.empty++;if(TALK.handsFree&&TALK.empty<2&&TALK.target)listen();else stopTalk();}};
+ TALK.rec=r;TALK.listening=true;setMic('listening');
+ const p=TALK.target;if(p)caption([[`Listening to you${p?' · '+p.cfg.name+' is all ears':''}`,'',true]]);
+ try{r.start();}catch(e){TALK.listening=false;setMic('idle');}
+}
+function stopTalk(){TALK.handsFree=false;TALK.busy=false;TALK.empty=0;if(TALK.rec){try{TALK.rec.abort();}catch(e){}TALK.rec=null;}TALK.listening=false;
+ if(TALK.abort){TALK.abort.abort();TALK.abort=null;}try{speechSynthesis.cancel();}catch(e){}if(TALK.target){TALK.target.talkT=0;TALK.target.chatHold=4;}
+ setMic('idle');setTimeout(()=>{if(!TALK.busy&&!TALK.listening)caption(null);},3500);}
+async function aiAvailable(){return !!(await getSample())||!!aiKey();}
+function openAISheet(){closeSheet();$('#talkBar').hidden=true;$('#aiSheet').hidden=false;$('#aiKey').value='';$('#aiForget').hidden=!aiKey();}
+function openTalkBar(msg){$('#talkBar').hidden=false;$('#tray').hidden=true;if(msg)toast(msg);setTimeout(()=>$('#talkInput').focus(),50);}
+$('#micBtn').addEventListener('click',async()=>{
+ initAudio();
+ if(TALK.listening||TALK.busy){stopTalk();return;}
+ try{speechSynthesis.speak(new SpeechSynthesisUtterance(''));}catch(e){}
+ if(!(await aiAvailable())){openAISheet();return;}
+ const p=pickTalkTarget();if(!p){toast('Walk up to someone and face them to talk.');return;}
+ engage(p);TALK.handsFree=true;TALK.empty=0;listen();toastOnce('talk',`Talk to ${p.cfg.name}. They'll answer out loud, then listen again. Tap the button to stop.`);
+});
+$('#typeBtn').addEventListener('click',async()=>{initAudio();if(!(await aiAvailable())){openAISheet();return;}openTalkBar();});
+$('#talkBar').addEventListener('submit',e=>{e.preventDefault();const v=$('#talkInput').value.trim();if(!v)return;$('#talkInput').value='';try{speechSynthesis.speak(new SpeechSynthesisUtterance(''));}catch(err){}TALK.handsFree=false;if(TALK.busy)stopTalk();sendLine(v);});
+$('#talkClose').addEventListener('click',()=>{$('#talkBar').hidden=true;if($('#sheet').hidden)$('#tray').hidden=false;});
+$('#btnAI').addEventListener('click',openAISheet);
+$('#aiClose').addEventListener('click',()=>{$('#aiSheet').hidden=true;});
+$('#aiSave').addEventListener('click',()=>{const k=$('#aiKey').value.trim();if(!/^sk-ant-/.test(k)){toast('That doesn\'t look like a Claude API key. They start with sk-ant-.');return;}
+ try{localStorage.setItem('roommates.claudeKey',k);}catch(e){}$('#aiSheet').hidden=true;toast('Saved. Tap the mic and talk to someone.');});
+$('#aiForget').addEventListener('click',()=>{try{localStorage.removeItem('roommates.claudeKey');}catch(e){}$('#aiForget').hidden=true;toast('Key removed from this phone.');});
+$('#typeBtn').innerHTML=svg('kbd');setMic('idle');
+getSample().then(s=>{if(s){$('#btnAI').hidden=true;}});
 
 /* ================= creator ================= */
 const TABS=[
