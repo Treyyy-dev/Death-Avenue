@@ -72,10 +72,10 @@ h1 span{color:var(--accent)}
 .tool{width:64px;padding:10px 4px 8px;border-radius:16px;display:grid;justify-items:center;gap:5px;font:600 11px/1.1 var(--body)}
 .tool svg{width:22px;height:22px}
 .tool.on{background:var(--accent);color:var(--accent-ink);border-color:transparent}
-#stick{position:fixed;left:max(20px,env(safe-area-inset-left,0px));bottom:calc(158px + env(safe-area-inset-bottom,0px));width:116px;height:116px;border-radius:50%;
+#stick,#stick2{position:fixed;left:max(20px,env(safe-area-inset-left,0px));bottom:calc(158px + env(safe-area-inset-bottom,0px));width:116px;height:116px;border-radius:50%;
   background:rgba(17,19,27,.42);border:1px solid var(--line);touch-action:none}
-#stick::after{content:"MOVE";position:absolute;left:0;right:0;bottom:-20px;text-align:center;font:700 10px var(--body);letter-spacing:.14em;color:var(--dim)}
-#knob{position:absolute;left:50%;top:50%;width:50px;height:50px;margin:-25px;border-radius:50%;background:rgba(242,241,238,.9);box-shadow:0 4px 14px rgba(0,0,0,.35)}
+#stick::after,#stick2::after{content:"MOVE";position:absolute;left:0;right:0;bottom:-20px;text-align:center;font:700 10px var(--body);letter-spacing:.14em;color:var(--dim)}
+#knob,.knob{position:absolute;left:50%;top:50%;width:50px;height:50px;margin:-25px;border-radius:50%;background:rgba(242,241,238,.9);box-shadow:0 4px 14px rgba(0,0,0,.35)}
 #tray{position:fixed;left:0;right:0;bottom:0;display:grid;gap:9px;
   padding:16px max(12px,env(safe-area-inset-right,0px)) calc(12px + env(safe-area-inset-bottom,0px)) max(12px,env(safe-area-inset-left,0px));
   background:linear-gradient(to top,rgba(12,14,19,.94),rgba(12,14,19,.7) 65%,rgba(12,14,19,0))}
@@ -102,6 +102,19 @@ h1 span{color:var(--accent)}
 .act svg{width:22px;height:22px}
 .act.on{background:var(--accent);color:var(--accent-ink);border-color:transparent}
 .act.danger{color:var(--danger)}
+.menu-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.menu-grid .btn{padding:14px;font-size:15px}
+#stick2{bottom:calc(196px + env(safe-area-inset-bottom,0px))}
+.gps-bottom{position:fixed;left:0;right:0;bottom:0;display:grid;gap:8px;padding:18px max(14px,env(safe-area-inset-right,0px)) calc(10px + env(safe-area-inset-bottom,0px)) max(14px,env(safe-area-inset-left,0px));
+  background:linear-gradient(to top,rgba(12,14,19,.9),rgba(12,14,19,.55) 70%,rgba(12,14,19,0))}
+.house-btn{display:flex;align-items:center;gap:14px;background:var(--accent);color:var(--accent-ink);border:0;border-radius:18px;padding:14px 18px;text-align:left;box-shadow:0 10px 26px rgba(0,0,0,.3)}
+.house-btn svg{width:32px;height:32px;flex:none}
+.house-btn strong{display:block;font:800 21px/1.05 var(--display);letter-spacing:-.01em}
+.house-btn small{font:600 13px var(--body);opacity:.75}
+.gps-row{display:flex;justify-content:space-between;gap:10px}
+.attrib{margin:0;font-size:10.5px;color:var(--dim);text-align:right}
+.hometag{position:absolute;left:0;top:0;background:var(--bubble);color:var(--bubble-ink);font:800 13px/1 var(--body);padding:7px 11px;border-radius:999px;display:flex;gap:6px;align-items:center;box-shadow:0 6px 18px rgba(0,0,0,.25);will-change:transform}
+.hometag small{font-weight:600;opacity:.65}
 .hint{font-size:12.5px;color:var(--dim);margin:0;line-height:1.4}
 
 /* labels / fx */
@@ -173,8 +186,12 @@ input[type=text]{width:100%;background:var(--raise);border:1px solid var(--line)
       <p class="lede">Design people from head to sneakers and hang out with them in a life-size room. Move your phone to look around, walk up to them, and watch them wander, sit down and react when you bump into them.</p>
       <div class="menu-actions">
         <button id="btnAR" class="btn primary"><span>Start AR<br><small>Move your phone to look around</small></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8V5a2 2 0 0 1 2-2h3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M8 21H5a2 2 0 0 1-2-2v-3"/><circle cx="12" cy="12" r="3.5"/></svg></button>
-        <button id="btnDemo" class="btn"><span>Touch controls<br><small>Drag to look, stick to walk</small></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg></button>
-        <button id="btnCreate" class="btn ghost"><span>Create people</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7" r="4"/><path d="M4 21c1-4.5 4.5-6.5 8-6.5s7 2 8 6.5"/></svg></button>
+        <div class="menu-grid">
+          <button id="btnGps" class="btn"><span>GPS mode<br><small>Walk your real world</small></span></button>
+          <button id="btnDemo" class="btn"><span>Touch controls<br><small>Drag to look</small></span></button>
+          <button id="btnMe" class="btn ghost"><span>Your character</span></button>
+          <button id="btnCreate" class="btn ghost"><span>Your people</span></button>
+        </div>
       </div>
       <p id="support" class="fine">Checking what your phone supports…</p>
     </div>
@@ -187,7 +204,7 @@ input[type=text]{width:100%;background:var(--raise);border:1px solid var(--line)
     </header>
     <div class="tools block">
       <button class="tool glass" id="toolHands" aria-pressed="false"></button>
-      <button class="tool glass" id="toolSkin" aria-label="Change your hand's skin tone"></button>
+      <button class="tool glass" id="toolSkin" aria-label="Change your hand's skin tone" hidden></button>
       <button class="tool glass on" data-tool="place" id="toolPlace" hidden></button>
       <button class="tool glass" data-tool="seat" id="toolSeat" hidden></button>
       <button class="tool glass" id="toolScan" hidden></button>
@@ -218,6 +235,20 @@ input[type=text]{width:100%;background:var(--raise);border:1px solid var(--line)
       <div id="controls"></div>
       <div class="confirm" id="crConfirm" hidden><span>Discard your changes?</span><div><button id="crKeep">Keep editing</button><button id="crDiscard">Discard</button></div></div>
       <div class="cr-foot"><div class="scroller" id="crRoster"></div><button class="save" id="crSave">Save</button></div>
+    </div>
+  </section>
+
+  <section id="gpsui" hidden>
+    <header class="topbar">
+      <button id="gpsBack" class="icon-btn glass block" aria-label="Back to menu"></button>
+      <div id="gpsStatus" class="pill glass block"><i class="dot warn"></i><span>Finding you…</span></div>
+    </header>
+    <div id="homeTag" class="hometag" hidden>Home<small></small></div>
+    <div id="stick2" class="block" hidden><div class="knob"></div></div>
+    <div class="gps-bottom block">
+      <button id="btnHouse" class="house-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg><span><strong>Go inside</strong><small id="houseDist">Your people are home</small></span></button>
+      <div class="gps-row"><button id="btnSetHome" class="link">Move home here</button><button id="btnMeEdit" class="link">Edit your character</button></div>
+      <p class="attrib" id="attrib" hidden>Imagery © Esri, Maxar, Earthstar Geographics, and the GIS user community</p>
     </div>
   </section>
 
@@ -311,6 +342,11 @@ const STORE='roommates.roster.v1';
 function loadRoster(){try{const r=JSON.parse(localStorage.getItem(STORE));if(Array.isArray(r)&&r.length)return r.map(c=>({...defaultCfg(),...c}));}catch(e){}return SAMPLES.map(c=>({...defaultCfg(),...c}));}
 function saveRoster(){try{localStorage.setItem(STORE,JSON.stringify(roster));}catch(e){}}
 let roster=loadRoster();
+const ME_KEY='roommates.me';
+function loadMe(){try{const m=JSON.parse(localStorage.getItem(ME_KEY));if(m&&typeof m==='object')return{...defaultCfg(),...m,id:'me'};}catch(e){}
+ return{...defaultCfg(),id:'me',name:'You',frame:'neutral',height:176,build:.45,skin:4,hair:'short',hairColor:1,top:'hoodie',topColor:'#2a4f8f',bottom:'joggers',bottomColor:'#1b1c20',shoes:'sneakers',shoeColor:'#f2f2ef',walk:'brisk',vibe:'social'};}
+let ME=loadMe();
+function saveMe(){try{localStorage.setItem(ME_KEY,JSON.stringify(ME));}catch(e){}}
 
 /* ================= renderer ================= */
 const canvas=$('#gl'), video=$('#cam');
@@ -528,7 +564,7 @@ const W={mode:'menu',floorY:0,map:new FloorMap(),seats:[],people:[],player:new T
 /* ================= person ================= */
 class Person{
  constructor(cfg,opts={}){
-  this.cfg=cfg;this.preview=!!opts.preview;this.root=new THREE.Group();
+  this.cfg=cfg;this.preview=!!opts.preview;this.walker=!!opts.walker;this.gscale=opts.gscale||1;this.gaitDiv=opts.gaitDiv||this.gscale;this.root=new THREE.Group();
   this.pos=new THREE.Vector2();this.lastX=0;this.lastZ=0;this.heading=0;this.yawRate=0;this.speed=0;this.phase=Math.random()*6;this.gw=0;this.tw=0;this.md=new THREE.Vector2(0,1);
   this.state='idle';this.timer=rand(1,3);this.path=null;this.onArrive=null;this.seat=null;this.sp=null;this.sitT=0;this.sitCD=rand(2,6);this.stay=false;this.sitAct=null;this.sitActT=0;this.sitActCD=3;
   this.act=null;this.actT=0;this.actDur=1;this.queueAct=null;this.push=new THREE.Vector2();this.stumble=new THREE.Vector2();this.bumpCD=0;this.flinch=0;
@@ -580,7 +616,7 @@ class Person{
   return true;
  }
  wander(){const t=W.map.randomTarget(this.pos.x,this.pos.y,3.4);if(!(t&&this.goTo(t.x,t.z)))this.timer=rand(1,2);}
- goGreet(){if(!this.goToPlayer(1.15,()=>{this.faceTarget=this.angleTo(W.player.x,W.player.z);this.lookPlayer(4);this.say(pick(HELLO));this.startAct(Math.random()<.6?'wave':'talk',2.2);}))this.wander();}
+ goGreet(){if(!this.goToPlayer(1.15,()=>{this.faceTarget=this.angleTo(W.player.x,W.player.z);this.lookPlayer(4);this.say(Math.random()<.45&&ME.name&&ME.name!=='You'?`Hey ${ME.name}!`:pick(HELLO));this.startAct(Math.random()<.6?'wave':'talk',2.2);}))this.wander();}
  goChat(o){
   const dx=this.pos.x-o.pos.x,dz=this.pos.y-o.pos.y,d=Math.hypot(dx,dz)||1;
   o.state='listen';o.actT=7;o.lookMode='person';o.lookPerson=this;o.lookTimer=7;o.faceTarget=o.angleTo(this.pos.x,this.pos.y);
@@ -627,7 +663,7 @@ class Person{
  // ---- per frame
  update(dt,t){
   this.yawRate=0;
-  if(this.preview){if(this.act){this.actT-=dt;if(this.actT<=0)this.act=null;}this.root.position.set(this.pos.x,this.baseY,this.pos.y);this.root.rotation.y=this.heading;this.lastX=this.pos.x;this.lastZ=this.pos.y;}
+  if(this.preview){if(this.act){this.actT-=dt;if(this.actT<=0)this.act=null;}this.root.position.set(this.pos.x,this.baseY,this.pos.y);this.root.rotation.y=this.heading;if(!this.walker){this.lastX=this.pos.x;this.lastZ=this.pos.y;}}
   else{this.think(dt);this.move(dt);}
   this.animate(dt,t);
  }
@@ -721,8 +757,8 @@ class Person{
   const T=this.T,J=this.J,s=this.s,WK=WALKS[this.cfg.walk]||WALKS.chill;Object.assign(T,this.base);
   // motion drives the gait, whatever caused it (walking, backing up, being shoved)
   const vx=(this.pos.x-this.lastX)/Math.max(dt,1e-4),vz=(this.pos.y-this.lastZ)/Math.max(dt,1e-4);this.lastX=this.pos.x;this.lastZ=this.pos.y;
-  const ch=Math.cos(this.heading),sh=Math.sin(this.heading);let spd=Math.hypot(vx,vz);if(spd>4)spd=0;
-  if(spd>.05){t2.set((vx*ch-vz*sh)/spd,(vx*sh+vz*ch)/spd);this.md.lerp(t2,1-Math.exp(-10*dt)).normalize();}
+  const ch=Math.cos(this.heading),sh=Math.sin(this.heading),raw=Math.hypot(vx,vz);let spd=raw/this.gaitDiv;if(spd>4)spd=0;
+  if(spd>.05){t2.set((vx*ch-vz*sh)/raw,(vx*sh+vz*ch)/raw);this.md.lerp(t2,1-Math.exp(-10*dt)).normalize();}
   this.gw=damp(this.gw,clamp(spd/.45,0,1),7,dt);
   this.tw=damp(this.tw,clamp(Math.abs(this.yawRate)/2.4,0,.75)*(1-this.gw),8,dt);
   const sl=spd/s,strideLen=clamp(.25+.45*sl,.25,WK.L);let om=Math.PI*sl/strideLen;if(this.tw>.05)om=Math.max(om,6.5);this.phase+=om*dt;
@@ -773,7 +809,7 @@ class Person{
   const talk=this.talkT>0?.35+.35*Math.sin(t*17):0;J.mouth.scale.y=1+1.5*Math.max(P.mouth,talk);
   J.phone.visible=this.act==='phone'||this.sitAct==='phone';
   this.proxy.position.z=P.hipZ*s;
-  if(this.spawnT<1)this.root.scale.setScalar(Math.max(.001,easeOutBack(this.spawnT)));else if(this.root.scale.x!==1)this.root.scale.setScalar(1);
+  const gs=this.gscale;if(this.spawnT<1)this.root.scale.setScalar(Math.max(.001,easeOutBack(this.spawnT))*gs);else if(this.root.scale.x!==gs)this.root.scale.setScalar(gs);
  }
 }
 
@@ -875,7 +911,7 @@ function applyLook(){
  reticle.visible=false;dots.visible=false;
  $('#stick').hidden=!(mode==='demo'||mode==='motion');
 }
-function showScreen(s){$('#menu').hidden=s!=='menu';$('#hud').hidden=s!=='hud';$('#creator').hidden=s!=='creator';$('#labels').hidden=s!=='hud';}
+function showScreen(s){$('#menu').hidden=s!=='menu';$('#hud').hidden=s!=='hud';$('#gpsui').hidden=s!=='gps';$('#creator').hidden=s!=='creator';$('#labels').hidden=s!=='hud';}
 function enterMenu(){mode='menu';W.mode='menu';setupDemoWorld();applyLook();showScreen('menu');closeSheet();}
 function enterRoom(kind){mode=kind;W.mode=kind;camera.fov=kind==='motion'?62:65;camera.updateProjectionMatrix();camera.position.set(0,1.6,1.9);look.yaw=0;look.pitch=-.15;ori.offset=null;
  applyLook();setTool('place');showScreen('hud');renderTray();if(!W.people.length)setupDemoWorld();
@@ -902,7 +938,8 @@ async function startXR(){
  }catch(e){toast("Motion tracking didn't start here, so turning your phone steers instead.");await startMotion();}
 }
 function onXREnd(){setHands(false);xr.binding=null;xr.sources.forEach(s=>{try{s.cancel();}catch(e){}});xr.session=null;xr.sources=[];renderer.setSize(innerWidth,innerHeight,false);if(mode==='xr')enterMenu();}
-function exitToMenu(){setHands(false);if(cr.open)closeCreator(true);if(xr.session){mode='menu';xr.session.end();enterMenu();return;}stopCam();enterMenu();}
+function exitToMenu(){setHands(false);if(cr.open)closeCreator(true);if(xr.session){mode='menu';xr.session.end();backOut();return;}stopCam();backOut();}
+function backOut(){if(W.fromGps){W.fromGps=false;enterGps();}else enterMenu();}
 
 /* ================= per-frame world ================= */
 const ctrl=renderer.xr.getController(0);world.add(ctrl);
@@ -985,6 +1022,7 @@ function updateWorld(dt,t,frame){
 /* ================= taps & commands ================= */
 function rayPlane(ray,y){if(Math.abs(ray.direction.y)<1e-4)return null;const t=(y-ray.origin.y)/ray.direction.y;if(t<.2||t>15)return null;return ray.origin.clone().addScaledVector(ray.direction,t);}
 function screenTap(x,y){
+ if(mode==='gps'&&!cr.open){gpsTap(x,y);return;}
  if(!(mode==='demo'||mode==='motion')||cr.open)return;
  raycaster.setFromCamera(t2.set(x/innerWidth*2-1,-(y/innerHeight)*2+1),camera);tapRay(raycaster.ray.clone());
 }
@@ -1068,20 +1106,24 @@ $('#btnExit').addEventListener('click',exitToMenu);
 $('#btnAR').addEventListener('click',startAR);
 $('#btnDemo').addEventListener('click',()=>{initAudio();enterDemo();});
 $('#btnCreate').addEventListener('click',()=>openCreator(roster[0]));
+$('#btnMe').addEventListener('click',()=>openCreator(ME,{me:true}));
+$('#btnGps').addEventListener('click',()=>{initAudio();enterGps();});
 
 // stick
-const stickEl=$('#stick'),knob=$('#knob');
-stickEl.addEventListener('pointerdown',e=>{stick.id=e.pointerId;stickEl.setPointerCapture(e.pointerId);moveStick(e);});
-stickEl.addEventListener('pointermove',e=>{if(e.pointerId===stick.id)moveStick(e);});
-const endStick=e=>{if(e.pointerId!==stick.id)return;stick.id=null;stick.x=stick.y=0;knob.style.transform='';};
-stickEl.addEventListener('pointerup',endStick);stickEl.addEventListener('pointercancel',endStick);
-function moveStick(e){const r=stickEl.getBoundingClientRect();let dx=e.clientX-(r.left+r.width/2),dy=e.clientY-(r.top+r.height/2);const R=44,l=Math.hypot(dx,dy);if(l>R){dx*=R/l;dy*=R/l;}stick.x=dx/R;stick.y=dy/R;knob.style.transform=`translate(${dx}px,${dy}px)`;}
+const stick2={x:0,y:0,id:null};
+function makeStick(el,st){const kb=el.firstElementChild;
+ const mv=e=>{const r=el.getBoundingClientRect();let dx=e.clientX-(r.left+r.width/2),dy=e.clientY-(r.top+r.height/2);const R=44,l=Math.hypot(dx,dy);if(l>R){dx*=R/l;dy*=R/l;}st.x=dx/R;st.y=dy/R;kb.style.transform=`translate(${dx}px,${dy}px)`;};
+ el.addEventListener('pointerdown',e=>{st.id=e.pointerId;el.setPointerCapture(e.pointerId);mv(e);});el.addEventListener('pointermove',e=>{if(e.pointerId===st.id)mv(e);});
+ const end=e=>{if(e.pointerId!==st.id)return;st.id=null;st.x=st.y=0;kb.style.transform='';};el.addEventListener('pointerup',end);el.addEventListener('pointercancel',end);}
+makeStick($('#stick'),stick);makeStick($('#stick2'),stick2);
 // look + tap on the 3D view
 let ptr=null;
 canvas.addEventListener('pointerdown',e=>{if(ptr)return;ptr={id:e.pointerId,x:e.clientX,y:e.clientY,lx:e.clientX,ly:e.clientY,t:performance.now(),moved:false};canvas.setPointerCapture(e.pointerId);});
 canvas.addEventListener('pointermove',e=>{if(!ptr||e.pointerId!==ptr.id)return;const dx=e.clientX-ptr.lx,dy=e.clientY-ptr.ly;ptr.lx=e.clientX;ptr.ly=e.clientY;
  if(Math.hypot(e.clientX-ptr.x,e.clientY-ptr.y)>9)ptr.moved=true;
- if(ptr.moved&&(mode==='demo'||(mode==='motion'&&!ori.active))){look.yaw-=dx*.0045;look.pitch=clamp(look.pitch-dy*.0045,-1.2,1.1);}});
+ if(ptr.moved&&(mode==='demo'||(mode==='motion'&&!ori.active))){look.yaw-=dx*.0045;look.pitch=clamp(look.pitch-dy*.0045,-1.2,1.1);}
+ if(ptr.moved&&mode==='gps'){gps.yaw-=dx*.006;gps.pitch=clamp(gps.pitch+dy*.004,.4,1.3);}});
+canvas.addEventListener('wheel',e=>{if(mode==='gps')gps.dist=clamp(gps.dist*(1+e.deltaY*.001),30,160);},{passive:true});
 canvas.addEventListener('pointerup',e=>{if(!ptr||e.pointerId!==ptr.id)return;if(!ptr.moved&&performance.now()-ptr.t<450)screenTap(e.clientX,e.clientY);ptr=null;});
 canvas.addEventListener('pointercancel',()=>{ptr=null;});
 // keep XR taps on the UI from reaching the room
@@ -1115,7 +1157,7 @@ const UPV=new THREE.Vector3(0,1,0);
 class HandRig{
  constructor(){
   this.g=new THREE.Group();this.g.visible=false;world.add(this.g);
-  this.mat=new THREE.MeshPhysicalMaterial({color:SKIN[HANDS.skin],roughness:.5,sheen:.35,sheenRoughness:.5,sheenColor:new THREE.Color('#ff8f73')});
+  this.mat=new THREE.MeshPhysicalMaterial({color:SKIN[ME.skin]??SKIN[3],roughness:.5,sheen:.35,sheenRoughness:.5,sheenColor:new THREE.Color('#ff8f73')});
   const sg=new THREE.SphereGeometry(1,14,10),cg=new THREE.CylinderGeometry(1,1,1,14,1,true);
   const jr=new Array(21).fill(.008);this.bones=[];
   FINGER.forEach((ch,f)=>{for(let k=0;k<4;k++){const a=ch[k],b=ch[k+1];if(f>0&&k===0)continue;const r=FING_R[f]*(1-.1*k);this.bones.push({a,b,r});jr[b]=Math.max(jr[b],r*(k===3?.95:1.04));jr[a]=Math.max(jr[a],r*1.04);}});
@@ -1178,7 +1220,7 @@ async function initHands(){
 }
 function stopHandCam(){if(HANDS.stream){HANDS.stream.getTracks().forEach(t=>t.stop());HANDS.stream=null;video.srcObject=null;}}
 function renderHandButtons(){const b=$('#toolHands');b.innerHTML=svg('hand')+(HANDS.on?'Hands on':'Hands');b.classList.toggle('on',HANDS.on);b.setAttribute('aria-pressed',String(HANDS.on));
- $('#toolSkin').innerHTML=`<span class="skin-dot" style="background:${SKIN[HANDS.skin]}"></span>Skin`;}
+}
 async function setHands(on){
  if(!on){HANDS.on=false;stopHandCam();for(const r of HANDS.rigs){r.g.visible=false;r.has=false;}renderHandButtons();return;}
  if(mode==='xr'){
@@ -1241,8 +1283,8 @@ const TABS=[
 ];
 const cr={open:false,draft:null,tab:'body',preview:null,dirty:false,changed:false,lastBuild:0,camY:1,camD:4,returnTo:'menu',inXR:false,rot:0,isNew:false};
 function previewH(){return Math.round(clamp(Math.min(innerHeight*.44,innerHeight-340),190,560));}
-function openCreator(cfg){
- cr.inXR=mode==='xr';cr.isNew=!cfg;cr.draft=cfg?clone(cfg):randomCfg();cr.changed=!cfg;cr.rot=0;
+function openCreator(cfg,opts={}){
+ cr.me=!!opts.me;if(cr.me)cfg=ME;cr.inXR=mode==='xr';cr.isNew=!cfg;cr.draft=cfg?clone(cfg):randomCfg();cr.changed=!cfg;cr.rot=0;
  if(!cr.preview)cr.preview=new Person(clone(cr.draft),{preview:true});else cr.preview.setCfg(clone(cr.draft));
  const pv=cr.preview;pv.pos.set(0,0);pv.heading=0;pv.baseY=0;pv.state='idle';
  if(cr.inXR){const f=tv.copy(xr.fwd).setY(0);if(f.lengthSq()<1e-4)f.set(0,0,-1);f.normalize();pv.pos.set(W.player.x+f.x*1.7,W.player.z+f.z*1.7);pv.baseY=W.floorY;pv.heading=Math.atan2(W.player.x-pv.pos.x,W.player.z-pv.pos.y);world.add(pv.root);pv.lookOverride=W.player;}
@@ -1250,14 +1292,14 @@ function openCreator(cfg){
  pv.lastX=pv.pos.x;pv.lastZ=pv.pos.y;cr.baseHeading=pv.heading;
  cr.open=true;cr.camY=pv.av.H*.52;cr.camD=4;closeSheet();
  document.documentElement.style.setProperty('--ph',previewH()+'px');showScreen('creator');$('#crConfirm').hidden=true;
- $('#crTop').style.background=cr.inXR?'transparent':'';renderTabs();renderControls();renderCrRoster();updateCrTitle();
+ $('#crTop').style.background=cr.inXR?'transparent':'';$('#crRoster').hidden=cr.me;renderTabs();renderControls();renderCrRoster();updateCrTitle();
 }
 function closeCreator(force){
  if(!force&&cr.changed){$('#crConfirm').hidden=false;return;}
  cr.open=false;cr.preview.root.parent?.remove(cr.preview.root);renderer.setScissorTest(false);renderer.setViewport(0,0,innerWidth,innerHeight);
- if(mode==='menu')showScreen('menu');else showScreen('hud');renderTray();
+ if(mode==='menu')showScreen('menu');else if(mode==='gps')showScreen('gps');else showScreen('hud');renderTray();
 }
-function updateCrTitle(){$('#crTitle').textContent=cr.isNew?'New person':cr.draft.name||'Unnamed';}
+function updateCrTitle(){$('#crTitle').textContent=cr.me?'Your character':cr.isNew?'New person':cr.draft.name||'Unnamed';}
 function renderTabs(){$('#tabs').innerHTML=TABS.map(t=>`<button class="tab${t.id===cr.tab?' on':''}" data-t="${t.id}">${t.label}</button>`).join('');}
 $('#tabs').addEventListener('click',e=>{const b=e.target.closest('.tab');if(!b)return;cr.tab=b.dataset.t;renderTabs();renderControls();$('#controls').scrollTop=0;});
 function renderControls(){
@@ -1269,7 +1311,7 @@ function renderControls(){
   else if(it.type==='chips'||it.type==='multi'){const sel=it.type==='multi'?new Set(v||[]):null;h+=`<div class="ctl"><span class="label">${it.label}</span><div class="opts" id="${id}">${it.opts.map(([k,l])=>`<button data-k="${it.k}" data-v="${k}" data-m="${it.type==='multi'?1:''}" class="opt${(sel?sel.has(k):k===v)?' on':''}">${l}</button>`).join('')}</div></div>`;}
   else if(it.type==='swatch')h+=`<div class="ctl"><span class="label">${it.label}</span><div class="sw" id="${id}">${it.colors.map((c,i)=>{const val=it.index?i:c;return `<button data-k="${it.k}" data-v="${val}" data-n="${it.index?1:''}" aria-label="${it.label} ${i+1}" style="background:${c}" class="${String(val)===String(v)?'on':''}"></button>`;}).join('')}</div></div>`;
  }
- if(cr.tab==='vibe'&&!cr.isNew&&roster.length>1)h+=`<button class="del" id="crDelete">Delete ${esc(d.name)}</button>`;
+ if(cr.tab==='vibe'&&!cr.isNew&&!cr.me&&roster.length>1)h+=`<button class="del" id="crDelete">Delete ${esc(d.name)}</button>`;
  box.innerHTML=h;
 }
 $('#controls').addEventListener('click',e=>{
@@ -1288,6 +1330,8 @@ function renderCrRoster(){$('#crRoster').innerHTML=roster.map(c=>`<button class=
 function loadIntoCreator(cfg){cr.isNew=!cfg;cr.draft=cfg?clone(cfg):randomCfg();cr.changed=!cfg;cr.dirty=true;$('#crConfirm').hidden=true;renderControls();renderCrRoster();updateCrTitle();}
 $('#crRoster').addEventListener('click',e=>{const b=e.target.closest('.chip');if(!b)return;if(b.dataset.new){loadIntoCreator(null);return;}loadIntoCreator(roster.find(c=>c.id===b.dataset.id));});
 $('#crSave').addEventListener('click',()=>{
+ if(cr.me){ME={...clone(cr.draft),id:'me'};saveMe();if(gps.player)gps.player.setCfg(clone(ME));for(const r of HANDS.rigs)r.mat.color.set(SKIN[ME.skin]??SKIN[3]);
+  cr.changed=false;updateCrTitle();cr.preview.act='wave';cr.preview.actT=cr.preview.actDur=2;beep(700,.07);toast('Saved your character.');return;}
  const d=clone(cr.draft);if(!d.name||d.name==='New person')d.name=pick(NAMES);cr.draft.name=d.name;
  const i=roster.findIndex(c=>c.id===d.id);if(i>=0)roster[i]=d;else roster.push(d);saveRoster();
  for(const p of W.people)if(p.cfg.id===d.id)p.setCfg(clone(d));
@@ -1319,6 +1363,123 @@ function renderCreator(dt,t){
  renderer.setScissorTest(true);renderer.setViewport(0,h-ph,w,ph);renderer.setScissor(0,h-ph,w,ph);ccam.aspect=w/ph;ccam.updateProjectionMatrix();renderer.render(cscene,ccam);renderer.setScissorTest(false);renderer.setClearColor(0x000000,0);
 }
 
+/* ================= GPS mode ================= */
+const GZ=18,GSCALE=7;
+const gps={scene:null,cam:null,player:null,house:null,marker:null,sun:null,shadow:null,watch:null,origin:null,home:null,homeXZ:{x:0,z:-38},target:new THREE.Vector2(),hasTarget:false,sim:false,tiles:new Map(),tileT:0,yaw:0,pitch:.78,dist:72,fails:0};
+const tileLoader=new THREE.TextureLoader();
+const lon2t=(lon,z)=>(lon+180)/360*2**z;
+const lat2t=(lat,z)=>{const r=lat*Math.PI/180;return(1-Math.log(Math.tan(r)+1/Math.cos(r))/Math.PI)/2*2**z;};
+const t2lon=(x,z)=>x/2**z*360-180;
+const t2lat=(y,z)=>{const n=Math.PI-2*Math.PI*y/2**z;return 180/Math.PI*Math.atan(Math.sinh(n));};
+function toXZ(lat,lon){const o=gps.origin;return{x:(lon-o.lon)*111320*Math.cos(o.lat*Math.PI/180),z:-(lat-o.lat)*110574};}
+function toLatLon(x,z){const o=gps.origin;return{lat:o.lat-z/110574,lon:o.lon+x/(111320*Math.cos(o.lat*Math.PI/180))};}
+function loadHome(){try{const h=JSON.parse(localStorage.getItem('roommates.home'));if(h&&isFinite(h.lat)&&isFinite(h.lon))return h;}catch(e){}return null;}
+function saveHome(h){try{localStorage.setItem('roommates.home',JSON.stringify(h));}catch(e){}}
+function fmtDist(m){return m<1000?`${Math.round(m)} m`:`${(m/1000).toFixed(1)} km`;}
+function setGpsStatus(k,txt){const el=$('#gpsStatus');el.firstChild.className='dot'+(k==='ok'?'':' '+k);el.lastChild.textContent=txt;}
+function buildHouse(){
+ const g=new THREE.Group();
+ const wall=new THREE.MeshStandardMaterial({color:'#f3ead8',roughness:.85}),roof=new THREE.MeshStandardMaterial({color:'#5b6ee1',roughness:.6}),trim=new THREE.MeshStandardMaterial({color:'#ffffff',roughness:.5}),
+  win=new THREE.MeshStandardMaterial({color:'#ffd98a',emissive:'#ffc35a',emissiveIntensity:.9}),door=new THREE.MeshStandardMaterial({color:'#7b4a2c',roughness:.6});
+ const add=(geo,m,x,y,z,ry=0)=>{const o=new THREE.Mesh(geo,m);o.position.set(x,y,z);o.rotation.y=ry;o.castShadow=true;o.receiveShadow=true;g.add(o);return o;};
+ add(new THREE.BoxGeometry(24,.8,20),trim,0,.4,0);
+ add(new RoundedBoxGeometry(22,13,18,3,.6),wall,0,7,0);
+ add(new THREE.ConeGeometry(17.5,10,4,1),roof,0,18.5,0,Math.PI/4).scale.set(1,1,.84);
+ add(new THREE.BoxGeometry(2.4,6,2.4),trim,6,21,-3);
+ add(new THREE.BoxGeometry(4,7,.6),door,0,4.3,9.05);
+ for(const x of[-7,7]){add(new THREE.BoxGeometry(4.2,4,.5),win,x,8,9.05);add(new THREE.BoxGeometry(4.8,.5,.7),trim,x,5.8,9.1);}
+ const path=new THREE.Mesh(new THREE.PlaneGeometry(4,14),new THREE.MeshStandardMaterial({color:'#e9e1cf',roughness:.9}));path.rotation.x=-Math.PI/2;path.position.set(0,.08,16);path.receiveShadow=true;g.add(path);
+ const mk=new THREE.Mesh(new THREE.OctahedronGeometry(3.2),new THREE.MeshStandardMaterial({color:'#9fadff',emissive:'#6c7ddc',emissiveIntensity:.6,roughness:.3}));mk.position.y=34;mk.scale.y=1.4;g.add(mk);gps.marker=mk;
+ g.visible=false;return g;
+}
+function buildGpsScene(){
+ const sc=new THREE.Scene();sc.background=new THREE.Color('#bfe3ff');sc.fog=new THREE.Fog('#bfe3ff',240,560);sc.environment=envTex;
+ sc.add(new THREE.HemisphereLight(0xffffff,0x6b8f5a,.9));
+ const sn=new THREE.DirectionalLight(0xfff4e0,2.2);sn.castShadow=true;sn.shadow.mapSize.set(1024,1024);Object.assign(sn.shadow.camera,{left:-45,right:45,top:45,bottom:-45,near:1,far:220});sn.shadow.normalBias=.05;sc.add(sn,sn.target);gps.sun=sn;
+ const gt=canvasTex(512,512,(c,w,h)=>{c.fillStyle='#9fd18b';c.fillRect(0,0,w,h);for(let i=0;i<1400;i++){c.fillStyle=`rgba(50,110,50,${Math.random()*.14})`;c.fillRect(Math.random()*w,Math.random()*h,3,3);}
+  c.fillStyle='#dfe3d6';c.fillRect(0,230,w,52);c.fillRect(230,0,52,h);c.fillStyle='#f6f7f1';c.fillRect(0,252,w,8);c.fillRect(252,0,8,h);});
+ gt.wrapS=gt.wrapT=THREE.RepeatWrapping;gt.repeat.set(40,40);
+ const ground=new THREE.Mesh(new THREE.PlaneGeometry(4000,4000),new THREE.MeshLambertMaterial({map:gt}));ground.rotation.x=-Math.PI/2;ground.position.y=-.05;ground.receiveShadow=true;sc.add(ground);
+ const sp=new THREE.Mesh(new THREE.PlaneGeometry(140,140),new THREE.ShadowMaterial({opacity:.28}));sp.rotation.x=-Math.PI/2;sp.position.y=.05;sp.receiveShadow=true;sc.add(sp);gps.shadow=sp;
+ gps.house=buildHouse();sc.add(gps.house);
+ gps.cam=new THREE.PerspectiveCamera(45,innerWidth/innerHeight,1,1500);gps.scene=sc;
+}
+function updateTiles(){
+ if(gps.sim||!gps.origin)return;const P=gps.player.pos,ll=toLatLon(P.x,P.y),cx=Math.floor(lon2t(ll.lon,GZ)),cy=Math.floor(lat2t(ll.lat,GZ)),R=3;
+ for(let dx=-R;dx<=R;dx++)for(let dy=-R;dy<=R;dy++){const x=cx+dx,y=cy+dy,k=x+'/'+y;if(gps.tiles.has(k))continue;
+  const a=toXZ(t2lat(y,GZ),t2lon(x,GZ)),b=toXZ(t2lat(y+1,GZ),t2lon(x+1,GZ));
+  const mt=new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:0,toneMapped:false});
+  const m=new THREE.Mesh(new THREE.PlaneGeometry(b.x-a.x,b.z-a.z),mt);m.rotation.x=-Math.PI/2;m.position.set((a.x+b.x)/2,0,(a.z+b.z)/2);gps.scene.add(m);gps.tiles.set(k,m);
+  tileLoader.load(`https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${GZ}/${y}/${x}`,t=>{t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=renderer.capabilities.getMaxAnisotropy();mt.map=t;mt.opacity=1;mt.transparent=false;mt.needsUpdate=true;$('#attrib').hidden=false;},undefined,()=>{gps.fails++;});}
+ for(const[k,m]of gps.tiles){const[x,y]=k.split('/').map(Number);if(Math.abs(x-cx)>R+2||Math.abs(y-cy)>R+2){gps.scene.remove(m);m.geometry.dispose();if(m.material.map)m.material.map.dispose();m.material.dispose();gps.tiles.delete(k);}}
+}
+function clearTiles(){for(const m of gps.tiles.values()){gps.scene.remove(m);m.geometry.dispose();if(m.material.map)m.material.map.dispose();m.material.dispose();}gps.tiles.clear();}
+function placeHouse(){
+ const h=gps.sim?gps.homeXZ:toXZ(gps.home.lat,gps.home.lon);gps.homeXZ=h;const P=gps.player.pos;
+ gps.house.position.set(h.x,0,h.z);gps.house.rotation.y=Math.atan2(P.x-h.x,P.y-h.z);gps.house.visible=true;
+}
+function goSim(msg){
+ gps.sim=true;clearTiles();gps.origin={lat:0,lon:0};gps.player.pos.set(0,0);gps.player.lastX=0;gps.player.lastZ=0;gps.homeXZ={x:0,z:-38};placeHouse();
+ setGpsStatus('warn','Practice map · no GPS');$('#stick2').hidden=false;$('#attrib').hidden=true;if(msg)toast(msg);
+}
+function onFix(pos){
+ const{latitude:lat,longitude:lon,accuracy:acc}=pos.coords;
+ if(gps.sim){gps.sim=false;gps.origin=null;}
+ if(!gps.origin){gps.origin={lat,lon};gps.player.pos.set(0,0);gps.player.lastX=0;gps.player.lastZ=0;gps.target.set(0,0);
+  if(!gps.home){gps.home=toLatLon(0,-38);saveHome(gps.home);toastOnce('home','Your house is just ahead. Tap it or Go inside to visit your people.');}
+  placeHouse();updateTiles();}
+ const p=toXZ(lat,lon);if(acc<60||!gps.hasTarget){gps.target.set(p.x,p.z);gps.hasTarget=true;}
+ setGpsStatus('ok',`GPS · within ${Math.round(acc)} m`);$('#stick2').hidden=true;
+}
+function startGeo(){
+ if(gps.watch!=null)return;
+ if(!navigator.geolocation){goSim("This browser can't share your location, so you're on a practice map. Use the stick to walk.");return;}
+ if(!gps.origin||gps.sim)setGpsStatus('warn','Finding you…');
+ gps.watch=navigator.geolocation.watchPosition(onFix,e=>{if(!gps.origin||gps.sim){if(!gps.sim)goSim(e.code===1?"Location is blocked, so you're on a practice map. Use the stick to walk.":"Couldn't find your location, so you're on a practice map. Use the stick to walk.");}else setGpsStatus('warn','Signal lost · showing your last spot');},{enableHighAccuracy:true,maximumAge:2000,timeout:20000});
+}
+function stopGeo(){if(gps.watch!=null){navigator.geolocation.clearWatch(gps.watch);gps.watch=null;}}
+function enterGps(){
+ if(!gps.scene)buildGpsScene();
+ if(!gps.player){gps.player=new Person(clone(ME),{preview:true,walker:true,gscale:GSCALE,gaitDiv:2});gps.scene.add(gps.player.root);}
+ if(!gps.home)gps.home=loadHome();
+ mode='gps';W.mode='gps';closeSheet();showScreen('gps');gps.cam.aspect=innerWidth/innerHeight;gps.cam.updateProjectionMatrix();
+ gps.player.act='wave';gps.player.actT=gps.player.actDur=2;
+ if(gps.origin)placeHouse();startGeo();
+}
+function leaveGps(){stopGeo();enterMenu();}
+function enterHouse(){initAudio();stopGeo();W.fromGps=true;beep(620,.07);startAR();}
+function gpsTap(x,y){raycaster.setFromCamera(t2.set(x/innerWidth*2-1,-(y/innerHeight)*2+1),gps.cam);if(gps.house.visible&&raycaster.intersectObject(gps.house,true).length)enterHouse();}
+function gpsFrame(dt,t){
+ const P=gps.player,fx=-Math.sin(gps.yaw),fz=-Math.cos(gps.yaw);
+ if(gps.sim){if(stick2.x||stick2.y){const f=-stick2.y,r=stick2.x,vx=(fx*f-fz*r)*4.5,vz=(fz*f+fx*r)*4.5;P.pos.x+=vx*dt;P.pos.y+=vz*dt;P.heading+=angDiff(P.heading,Math.atan2(vx,vz))*Math.min(1,dt*8);}}
+ else if(gps.hasTarget){const dx=gps.target.x-P.pos.x,dz=gps.target.y-P.pos.y,d=Math.hypot(dx,dz);
+  if(d>90){P.pos.set(gps.target.x,gps.target.y);P.lastX=P.pos.x;P.lastZ=P.pos.y;}
+  else if(d>1.2){const st=Math.min(d,Math.min(7,Math.max(1.2,d*.9))*dt);P.pos.x+=dx/d*st;P.pos.y+=dz/d*st;P.heading+=angDiff(P.heading,Math.atan2(dx,dz))*Math.min(1,dt*6);}}
+ P.baseY=0;P.update(dt,t);
+ const hd=Math.cos(gps.pitch)*gps.dist,hh=Math.sin(gps.pitch)*gps.dist;
+ gps.cam.position.set(P.pos.x+Math.sin(gps.yaw)*hd,hh,P.pos.y+Math.cos(gps.yaw)*hd);gps.cam.lookAt(P.pos.x,6,P.pos.y);
+ gps.sun.target.position.set(P.pos.x,0,P.pos.y);gps.sun.position.set(P.pos.x+30,80,P.pos.y+40);gps.shadow.position.set(P.pos.x,.05,P.pos.y);
+ if(gps.marker){gps.marker.rotation.y+=dt*1.4;gps.marker.position.y=34+Math.sin(t*2)*1.5;}
+ gps.tileT-=dt;if(gps.tileT<=0){gps.tileT=1;updateTiles();}
+ const tag=$('#homeTag');
+ if(gps.house.visible){const d=Math.hypot(gps.homeXZ.x-P.pos.x,gps.homeXZ.z-P.pos.y);
+  $('#houseDist').textContent=d<25?"You're home. Your people are inside.":`Your people are home · ${fmtDist(d)} away`;
+  tv.set(gps.homeXZ.x,42,gps.homeXZ.z);tv2.copy(tv).applyMatrix4(gps.cam.matrixWorldInverse);
+  if(tv2.z<0){tv.project(gps.cam);tag.hidden=false;tag.lastChild.textContent=fmtDist(d);tag.style.transform=`translate(${((tv.x+1)/2*innerWidth).toFixed(1)}px,${((1-tv.y)/2*innerHeight).toFixed(1)}px) translate(-50%,-100%)`;}else tag.hidden=true;}
+ else tag.hidden=true;
+ renderer.render(gps.scene,gps.cam);
+}
+$('#gpsBack').innerHTML=svg('back');
+$('#gpsBack').addEventListener('click',leaveGps);
+$('#btnHouse').addEventListener('click',enterHouse);
+$('#btnMeEdit').addEventListener('click',()=>openCreator(ME,{me:true}));
+$('#btnSetHome').addEventListener('click',()=>{
+ if(!gps.origin){toast('Still finding you. Try again in a moment.');return;}
+ const P=gps.player.pos,fx=-Math.sin(gps.yaw),fz=-Math.cos(gps.yaw),x=P.x+fx*38,z=P.y+fz*38;
+ if(gps.sim)gps.homeXZ={x,z};else{gps.home=toLatLon(x,z);saveHome(gps.home);}
+ placeHouse();beep(600,.06);toast('Home moved here.');
+});
+
 /* ================= status ================= */
 let statusT=0;
 function updateStatus(){
@@ -1334,13 +1495,14 @@ let last=performance.now();
 renderer.setAnimationLoop((time,frame)=>{
  const now=performance.now(),dt=Math.min(.05,Math.max(.001,(now-last)/1000)),t=now/1000;last=now;
  if(cr.open&&!cr.inXR){creatorTick(dt,t);renderCreator(dt,t);return;}
+ if(mode==='gps'){gpsFrame(dt,t);return;}
  updateWorld(dt,t,frame);
  if(cr.open&&cr.inXR)creatorTick(dt,t);
  if(mode!=='menu')updateHands(dt);
  renderer.render(world,camera);updateLabels();
  statusT-=dt;if(statusT<=0&&mode!=='menu'){statusT=.25;updateStatus();}
 });
-addEventListener('resize',()=>{if(renderer.xr.isPresenting)return;renderer.setSize(innerWidth,innerHeight,false);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();document.documentElement.style.setProperty('--ph',previewH()+'px');});
+addEventListener('resize',()=>{if(renderer.xr.isPresenting)return;renderer.setSize(innerWidth,innerHeight,false);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();if(gps.cam){gps.cam.aspect=innerWidth/innerHeight;gps.cam.updateProjectionMatrix();}document.documentElement.style.setProperty('--ph',previewH()+'px');});
 
 (async function boot(){
  enterMenu();
