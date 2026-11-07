@@ -126,6 +126,12 @@ h1 span{color:var(--accent)}
   padding:16px max(16px,env(safe-area-inset-right,0px)) calc(14px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
 #aiSheet input{width:100%;background:var(--raise);border:1px solid var(--line);border-radius:12px;padding:13px 14px;font:600 16px var(--body);color:var(--fg)}
 .row{display:flex;gap:8px;flex-wrap:wrap}
+.prog{height:8px;border-radius:99px;background:var(--raise);overflow:hidden}
+.prog i{display:block;height:100%;width:0;background:var(--mint);transition:width .3s}
+#aiSheet details{border-top:1px solid var(--line);padding-top:10px}
+#aiSheet summary{font:700 14px var(--body);color:var(--accent);cursor:pointer;padding:4px 0}
+#aiSheet details[open] summary{margin-bottom:10px}
+#aiSheet details > *:not(summary){margin-top:8px}
 .menu-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .menu-grid .btn{padding:14px;font-size:15px}
 #stick2{bottom:calc(196px + env(safe-area-inset-bottom,0px))}
@@ -254,10 +260,17 @@ input[type=text]{width:100%;background:var(--raise);border:1px solid var(--line)
       <button class="done" type="button" id="talkClose">Close</button>
     </form>
     <div id="aiSheet" class="block" hidden>
-      <div class="sheet-head"><div><strong>Give your people a voice</strong><em>One-time setup</em></div><button class="done" id="aiClose" type="button">Close</button></div>
-      <p class="hint" id="aiText">Conversations run on Claude. Paste a Claude API key from console.anthropic.com below. It's saved only on this phone and sent straight to Anthropic. Each reply costs a fraction of a cent on your API account.</p>
-      <input type="password" id="aiKey" placeholder="sk-ant-…" autocomplete="off" aria-label="Claude API key">
-      <div class="row"><button class="save" id="aiSave" type="button">Save key</button><button class="done" id="aiForget" type="button">Remove key</button></div>
+      <div class="sheet-head"><div><strong>Their brain</strong><em id="brainState">Free and unlimited</em></div><button class="done" id="aiClose" type="button">Close</button></div>
+      <p class="hint" id="brainText">Your people think with a small AI that runs right on this phone. It's free and unlimited for everyone who plays. It downloads once, then works offline. Use Wi-Fi for the download.</p>
+      <div class="seg" id="brainSizes"><button type="button" data-size="light">Light · ~300 MB</button><button type="button" data-size="standard">Standard · ~800 MB</button></div>
+      <div class="prog" id="brainProg" hidden><i></i></div>
+      <button class="save" id="brainGo" type="button">Download brain</button>
+      <details id="claudeBox">
+        <summary>Use Claude instead (smarter, needs a key)</summary>
+        <p class="hint">Paste a Claude API key from console.anthropic.com. It's saved only on this phone, and each reply costs a fraction of a cent on your API account. Other players keep using the free built-in brain.</p>
+        <input type="password" id="aiKey" placeholder="sk-ant-…" autocomplete="off" aria-label="Claude API key">
+        <div class="row"><button class="save" id="aiSave" type="button">Save key</button><button class="done" id="aiForget" type="button">Remove key</button></div>
+      </details>
     </div>
   </section>
 
@@ -1325,10 +1338,65 @@ About you: about ${c.height} cm tall, with ${hair}, wearing ${TOP_TXT[c.top]||'c
 Right now you are ${activityOf(p)}.${others.length?' Also in the room: '+others.join(', ')+'.':''}
 How to reply: stay in character as ${c.name}, warm and casual. Answer any question or topic ${me==='the player'?'they':me} brings up honestly and helpfully, the way a smart friend would. Keep it short, one to three sentences, so it fits in a speech bubble, unless they ask for more. Use plain words only: no emojis, lists, stage directions or markdown.`;
 }
-async function askAI(p,text,signal){
+function shortPersona(p){const c=p.cfg,me=ME.name&&ME.name!=='You'?ME.name:'the player';
+ return `You are ${c.name}, a character in a cozy shared room in the game Room Mates. Personality: ${VIBE_TXT[c.vibe]||VIBE_TXT.social}. You are ${activityOf(p)}. ${me} is talking to you face to face. Reply as ${c.name} in one or two short, casual sentences. Answer any question as well as you can. No emojis, lists or narration.`;}
+const JOKES=["Why did the couch go to therapy? It had too many people sitting on its feelings.","I told my plant a joke. It didn't laugh, but it grew on me.","What do you call a lazy kangaroo? A pouch potato."];
+function scriptedReply(p,text){
+ const t=text.toLowerCase(),n=p.cfg.name,me=ME.name&&ME.name!=='You'?' '+ME.name:'',v=p.cfg.vibe;
+ if(/\b(hi|hey|hello|yo|sup)\b|what'?s up/.test(t))return pick([`Hey${me}! Good to see you.`,"Oh hey! What's going on?","Hi! Come hang out."]);
+ if(/how are you|how'?s it going|how you doing|how are u/.test(t))return pick(({homebody:["Pretty good. Just relaxing.","Cozy and calm, honestly."],social:["Great now that you're here!","Doing awesome, thanks for asking!"],hyper:["Amazing! I've got so much energy today!","Fantastic! Wanna dance?"]})[v]||["Good, thanks!"]);
+ if(/your name|who are you/.test(t))return `I'm ${n}! Nice to meet you.`;
+ if(/what are you doing|what you doing|whatcha/.test(t))return `I'm ${activityOf(p).replace('your phone','my phone')}.`;
+ if(/\bdance\b/.test(t)){setTimeout(()=>{if(!p.isSeatedLocked())p.queue(()=>p.startAct('dance',6));},1500);return pick(["Okay, watch this!","Say less!"]);}
+ if(/\bjoke\b|funny/.test(t))return pick(JOKES);
+ if(/\b(thanks|thank you)\b/.test(t))return pick(["Anytime!","Of course!"]);
+ if(/\b(bye|see you|later)\b/.test(t))return pick(["See you later!","Bye! Come back soon."]);
+ if(/\?\s*$/.test(t)||/^(what|why|how|when|where|who|can|do|does|is|are|will|would|should)\b/.test(t))return pick(["Hmm, good question. I'm honestly not sure!","Ooh, I'd have to think about that one.","No idea, but I love that you asked."]);
+ return pick(["Ha, totally.","For real?","That's cool.","Tell me more!","I hear you.","Nice!"]);
+}
+/* on-phone brain (WebLLM): free, unlimited, runs on the player's GPU */
+const WEBLLM='https://cdn.jsdelivr.net/npm/@mlc-ai/web-llm@0.2.78/+esm';
+const LLM={engine:null,loading:null,progress:0,model:null,gpu:undefined};
+function brainSize(){try{const v=localStorage.getItem('roommates.brainSize');if(v==='light'||v==='standard')return v;}catch(e){}return(navigator.deviceMemory&&navigator.deviceMemory<=4)?'light':'standard';}
+async function gpuOK(){if(LLM.gpu!==undefined)return LLM.gpu;try{const a=navigator.gpu&&await navigator.gpu.requestAdapter();LLM.gpu=a?{f16:a.features.has('shader-f16')}:null;}catch(e){LLM.gpu=null;}return LLM.gpu;}
+function modelFor(size,f16){const q=f16?'q4f16_1':'q4f32_1';return size==='light'?`Qwen2.5-0.5B-Instruct-${q}-MLC`:`Llama-3.2-1B-Instruct-${q}-MLC`;}
+function brainDownloaded(){try{return !!localStorage.getItem('roommates.brainModel');}catch(e){return false;}}
+function onBrainProgress(r){const pct=Math.round((r.progress||0)*100);LLM.progress=pct;
+ const bar=$('#brainProg');bar.hidden=false;bar.firstChild.style.width=pct+'%';
+ $('#brainState').textContent=pct<100?`Getting ready… ${pct}%`:'Starting up…';
+ if(TALK.busy)caption([['Brain',`Getting ready the first time… ${pct}%. Keep this page open.`,true]]);}
+function ensureLocal(){
+ if(LLM.engine)return Promise.resolve(LLM.engine);if(LLM.loading)return LLM.loading;
+ LLM.loading=(async()=>{
+  const g=await gpuOK();if(!g)throw{code:'no_gpu'};const id=modelFor(brainSize(),g.f16);
+  try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist();}catch(e){}
+  let webllm;try{webllm=await import(WEBLLM);}catch(e){throw{code:'brain_load'};}
+  const src=`import {WebWorkerMLCEngineHandler} from "${WEBLLM}";const h=new WebWorkerMLCEngineHandler();self.onmessage=m=>h.onmessage(m);`;
+  let eng;
+  try{const wk=new Worker(URL.createObjectURL(new Blob([src],{type:'text/javascript'})),{type:'module'});eng=await webllm.CreateWebWorkerMLCEngine(wk,id,{initProgressCallback:onBrainProgress});}
+  catch(e){try{eng=await webllm.CreateMLCEngine(id,{initProgressCallback:onBrainProgress});}catch(e2){throw{code:/memory|allocat|device lost/i.test(String(e2&&e2.message||e2))?'brain_memory':'brain_load'};}}
+  LLM.engine=eng;LLM.model=id;try{localStorage.setItem('roommates.brainModel',id);}catch(e){}
+  $('#brainState').textContent='Ready · free and unlimited';$('#brainProg').hidden=true;$('#brainGo').textContent='Brain ready';$('#brainGo').disabled=true;
+  return eng;
+ })();
+ LLM.loading.catch(()=>{LLM.loading=null;$('#brainProg').hidden=true;});
+ return LLM.loading;
+}
+async function localReply(p,hist,signal,onText){
+ const eng=await ensureLocal();const msgs=[{role:'system',content:shortPersona(p)},...hist.slice(-8)];
+ const stop=()=>{try{eng.interruptGenerate();}catch(e){}};signal&&signal.addEventListener('abort',stop);
+ const stream=await eng.chat.completions.create({messages:msgs,max_tokens:110,temperature:.8,top_p:.9,stream:true});
+ let t='';for await(const ch of stream){t+=(ch.choices&&ch.choices[0]&&ch.choices[0].delta&&ch.choices[0].delta.content)||'';if(signal&&signal.aborted)throw{code:'cancelled'};onText&&onText(t);}
+ return t;
+}
+async function brainMode(){if(await getSample())return'sample';if(aiKey())return'claude';if(LLM.engine||LLM.loading)return'local';const g=await gpuOK();if(!g)return'script';return brainDownloaded()?'local':'ask';}
+async function askAI(p,text,signal,onText){
  const hist=TALK.hist.get(p)||[];hist.push({role:'user',content:text});while(hist.length>14)hist.shift();if(hist[0].role!=='user')hist.shift();TALK.hist.set(p,hist);
- const sample=await getSample();let reply;
- if(sample){const r=await sample([{role:'user',content:personaFor(p)},...hist],{modelTier:'quick',cache:false,signal});reply=r.text;}
+ const mode=await brainMode();let reply;
+ if(mode==='script'){toastOnce('script',"This phone can't run the built-in AI, so people give simple replies.");reply=scriptedReply(p,text);}
+ else if(mode==='local'||mode==='ask'){try{reply=await localReply(p,hist,signal,onText);}catch(e){if(e&&e.code==='cancelled')throw e;
+   toastOnce('brainfail',e&&e.code==='brain_memory'?"This phone ran out of memory for the brain. Try the Light size in AI voice.":"The built-in brain couldn't start here, so people give simple replies for now.");reply=scriptedReply(p,text);}}
+ else if(mode==='sample'){const sample=await getSample();const r=await sample([{role:'user',content:personaFor(p)},...hist],{modelTier:'quick',cache:false,signal,onText:({text})=>onText&&onText(text)});reply=r.text;}
  else{const key=aiKey();if(!key)throw{code:'no_ai'};
   const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',signal,headers:{'content-type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
    body:JSON.stringify({model:'claude-haiku-5-5',max_tokens:300,system:personaFor(p),messages:hist})});
@@ -1344,7 +1412,7 @@ async function sendLine(text){
  engage(p);TALK.busy=true;setMic('thinking');caption([[ME.name&&ME.name!=='You'?ME.name:'You',text,true]]);p.say('…',999);p.talkT=0;
  TALK.abort=new AbortController();
  try{
-  const reply=await askAI(p,text,TALK.abort.signal);if(!TALK.busy)return;
+  const reply=await askAI(p,text,TALK.abort.signal,t=>{if(TALK.busy&&t.trim()){p.say(t.trim(),999);p.talkT=0;}});if(!TALK.busy)return;
   setTimeout(()=>{if(!TALK.listening&&!TALK.busy)caption(null);},2500);
   if(!p.isSeatedLocked()&&p.state==='idle')p.startAct('talk',Math.min(8,1.5+reply.length*.04));
   showReply(p,reply,()=>{p.chatHold=20;if(!TALK.busy)return;TALK.busy=false;setMic('idle');if(TALK.handsFree)listen();});
@@ -1374,8 +1442,17 @@ function listen(){
 function stopTalk(){TALK.handsFree=false;TALK.busy=false;TALK.empty=0;if(TALK.rec){try{TALK.rec.abort();}catch(e){}TALK.rec=null;}TALK.listening=false;
  if(TALK.abort){TALK.abort.abort();TALK.abort=null;}if(TALK.target){TALK.target.talkT=0;TALK.target.chatHold=4;}
  setMic('idle');setTimeout(()=>{if(!TALK.busy&&!TALK.listening)caption(null);},3500);}
-async function aiAvailable(){return !!(await getSample())||!!aiKey();}
-function openAISheet(){closeSheet();$('#talkBar').hidden=true;$('#aiSheet').hidden=false;$('#aiKey').value='';$('#aiForget').hidden=!aiKey();}
+async function aiAvailable(){const m=await brainMode();if(m==='local'&&!LLM.engine)ensureLocal().catch(()=>{});return m!=='ask';}
+function renderBrainSheet(){
+ const sz=brainSize();document.querySelectorAll('#brainSizes button').forEach(b=>b.classList.toggle('on',b.dataset.size===sz));
+ const go=$('#brainGo');
+ if(LLM.engine){$('#brainState').textContent='Ready · free and unlimited';go.textContent='Brain ready';go.disabled=true;}
+ else if(LLM.loading){go.textContent='Downloading…';go.disabled=true;}
+ else{go.disabled=false;go.textContent=brainDownloaded()?'Load brain':'Download brain';$('#brainState').textContent=aiKey()?'Using your Claude key':'Free and unlimited';}
+ $('#aiForget').hidden=!aiKey();$('#aiKey').value='';
+}
+function openAISheet(){closeSheet();$('#talkBar').hidden=true;$('#aiSheet').hidden=false;renderBrainSheet();
+ gpuOK().then(g=>{if(!g){$('#brainText').textContent="This phone's browser can't run the built-in AI (it needs WebGPU, found in recent Chrome and the newest iPhones). People will give simple replies, or you can add a Claude key below.";$('#brainGo').hidden=true;$('#brainSizes').hidden=true;}});}
 function openTalkBar(msg){$('#talkBar').hidden=false;$('#tray').hidden=true;if(msg)toast(msg);setTimeout(()=>$('#talkInput').focus(),50);}
 $('#micBtn').addEventListener('click',async()=>{
  initAudio();
@@ -1388,10 +1465,15 @@ $('#typeBtn').addEventListener('click',async()=>{initAudio();if(!(await aiAvaila
 $('#talkBar').addEventListener('submit',e=>{e.preventDefault();const v=$('#talkInput').value.trim();if(!v)return;$('#talkInput').value='';TALK.handsFree=false;if(TALK.busy)stopTalk();sendLine(v);});
 $('#talkClose').addEventListener('click',()=>{$('#talkBar').hidden=true;if($('#sheet').hidden)$('#tray').hidden=false;});
 $('#btnAI').addEventListener('click',openAISheet);
+if(brainDownloaded())setTimeout(()=>gpuOK(),1500);
 $('#aiClose').addEventListener('click',()=>{$('#aiSheet').hidden=true;});
+$('#brainSizes').addEventListener('click',e=>{const b=e.target.closest('button');if(!b||LLM.loading)return;try{localStorage.setItem('roommates.brainSize',b.dataset.size);}catch(err){}
+ if(LLM.engine&&!LLM.model.startsWith(b.dataset.size==='light'?'Qwen':'Llama')){try{LLM.engine.unload();}catch(err){}LLM.engine=null;try{localStorage.removeItem('roommates.brainModel');}catch(err){}}renderBrainSheet();});
+$('#brainGo').addEventListener('click',()=>{ensureLocal().then(()=>{renderBrainSheet();toast('Brain ready. Tap the mic and talk to anyone.');beep(700,.07);})
+ .catch(e=>{renderBrainSheet();toast(e&&e.code==='no_gpu'?"This phone can't run the built-in AI.":e&&e.code==='brain_memory'?'Not enough memory. Pick Light and try again.':"The download didn't finish. Check your connection and try again.");});renderBrainSheet();});
 $('#aiSave').addEventListener('click',()=>{const k=$('#aiKey').value.trim();if(!/^sk-ant-/.test(k)){toast('That doesn\'t look like a Claude API key. They start with sk-ant-.');return;}
- try{localStorage.setItem('roommates.claudeKey',k);}catch(e){}$('#aiSheet').hidden=true;toast('Saved. Tap the mic and talk to someone.');});
-$('#aiForget').addEventListener('click',()=>{try{localStorage.removeItem('roommates.claudeKey');}catch(e){}$('#aiForget').hidden=true;toast('Key removed from this phone.');});
+ try{localStorage.setItem('roommates.claudeKey',k);}catch(e){}$('#aiSheet').hidden=true;toast('Claude key saved on this phone. Other players still use the free brain.');});
+$('#aiForget').addEventListener('click',()=>{try{localStorage.removeItem('roommates.claudeKey');}catch(e){}renderBrainSheet();toast('Key removed. Back to the free built-in brain.');});
 $('#typeBtn').innerHTML=svg('kbd');setMic('idle');
 getSample().then(s=>{if(s){$('#btnAI').hidden=true;}});
 
