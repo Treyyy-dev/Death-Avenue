@@ -32,7 +32,8 @@ body{font-family:var(--body);touch-action:none;-webkit-user-select:none;user-sel
 button{font-family:var(--body);color:inherit;cursor:pointer}
 button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 #gl{position:fixed;inset:0;width:100%;height:100%;display:block;z-index:1}
-#cam{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;display:none;background:#000}
+#cam{position:fixed;left:0;top:0;width:2px;height:2px;opacity:0;pointer-events:none;z-index:0}
+.skin-dot{width:22px;height:22px;border-radius:50%;border:2px solid rgba(255,255,255,.35)}
 #ui{position:fixed;inset:0;z-index:2;pointer-events:none}
 .block{pointer-events:auto}
 .glass{background:var(--panel);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border:1px solid var(--line)}
@@ -184,10 +185,12 @@ input[type=text]{width:100%;background:var(--raise);border:1px solid var(--line)
       <button id="btnExit" class="icon-btn glass block" aria-label="Back to menu"></button>
       <div id="status" class="pill glass block"><i class="dot"></i><span></span></div>
     </header>
-    <div class="tools block" hidden>
-      <button class="tool glass on" data-tool="place" id="toolPlace"></button>
-      <button class="tool glass" data-tool="seat" id="toolSeat"></button>
-      <button class="tool glass" id="toolScan"></button>
+    <div class="tools block">
+      <button class="tool glass" id="toolHands" aria-pressed="false"></button>
+      <button class="tool glass" id="toolSkin" aria-label="Change your hand's skin tone"></button>
+      <button class="tool glass on" data-tool="place" id="toolPlace" hidden></button>
+      <button class="tool glass" data-tool="seat" id="toolSeat" hidden></button>
+      <button class="tool glass" id="toolScan" hidden></button>
     </div>
     <div id="stick" class="block"><div id="knob"></div></div>
     <div id="tray" class="block">
@@ -258,6 +261,7 @@ const IC={
  scan:'<path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3"/><path d="M4 12h16"/>',
  come:'<path d="M12 4v15M6 13l6 6 6-6"/>',
  follow:'<path d="M5 19l4-4M9 15V9.5M9 9.5h5.5M19 5l-4 4"/><circle cx="16.5" cy="7.5" r="0"/><path d="M14 13l3 3-3 3"/>',
+ hand:'<path d="M7 12V6.5a1.5 1.5 0 0 1 3 0V11M10 10.5V4.5a1.5 1.5 0 0 1 3 0v6M13 10.5V5.5a1.5 1.5 0 0 1 3 0v6M16 11.5V8.5a1.5 1.5 0 0 1 3 0V15c0 3.9-2.6 6.5-6.5 6.5-2.7 0-4.3-1.4-5.7-3.7L4.3 13.4a1.5 1.5 0 0 1 2.5-1.6L7 12"/>',
  wave:'<path d="M8 13V6.5a1.5 1.5 0 0 1 3 0V12M11 11V4.5a1.5 1.5 0 0 1 3 0V11M14 11V6a1.5 1.5 0 0 1 3 0v7.5c0 4-2.5 6.5-6 6.5-2.8 0-4.4-1.6-5.8-4.2L3.5 12.6a1.5 1.5 0 0 1 2.4-1.7L8 13"/>',
  dance:'<path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/>',
  stretch:'<circle cx="12" cy="5" r="2"/><path d="M5 3l7 6 7-6M12 9v6M9 21l3-6 3 6"/>',
@@ -276,6 +280,8 @@ const DENIM=['#2c3e5c','#4a6488','#7393b8','#1c1f26','#8a8f98'];
 const NAMES=['Maya','Jordan','Theo','Ava','Kai','Nia','Leo','Zoe','Omar','Ivy','Eli','Rosa','Dev','Luna','Max','Aria','Sam','Jade','Remy','Tess','Malik','Priya','Hugo','Sana'];
 const HELLO=["Hey!","What's up?","Oh, hi!","Nice place you got.","Yo!","Hi there.","Hey you!"];
 const BUMP=["Whoa!","Hey, watch it!","Oof!","Excuse you!","Oh, sorry!","Personal space!","Careful!","Ow!"];
+const TOUCH=["Hey!","That tickles!","Boop.","Can I help you?","Hi, hand.","Oh! Hello."];
+const HEADTOUCH=["My hair!","Not the head!","Hey, I just fixed that."];
 const SBUMP=["I'm sitting here!","Hey, easy!","Watch the feet!","Whoa, hi."];
 const CHATS=[["Did you see that?","Ha, yeah I did."],["This room's nice.","Right? So cozy."],["Wanna sit down?","In a minute."],["You good?","Never better."],["What's for dinner?","Pizza, obviously."],["Who keeps pointing a phone at us?","No idea. Just wave."],["Love your shoes.","Thanks, they're new!"],["Long day?","The longest."]];
 const FRAMES={masc:{sh:1.08,hip:.94,waist:1,bust:0,jaw:1.1,neck:1.1,arm:1.06,thigh:1,stance:1},neutral:{sh:1,hip:1,waist:.93,bust:.25,jaw:1,neck:1,arm:1,thigh:1,stance:1},fem:{sh:.92,hip:1.08,waist:.82,bust:1,jaw:.9,neck:.9,arm:.92,thigh:1.04,stance:.9}};
@@ -528,7 +534,7 @@ class Person{
   this.act=null;this.actT=0;this.actDur=1;this.queueAct=null;this.push=new THREE.Vector2();this.stumble=new THREE.Vector2();this.bumpCD=0;this.flinch=0;
   this.lookMode='ahead';this.lookTimer=0;this.lookPerson=null;this.lookOverride=null;this.scanYaw=0;this.scanPitch=0;this.hy=0;this.hp=0;this.eyeX=0;this.eyeY=0;this.faceTarget=null;
   this.blink=rand(1,4);this.blinkT=0;this.bubbleText='';this.bubbleT=0;this.talkT=0;this.sayQ=null;this.follow=false;this.followT=0;this.pending=null;this.spawnT=1;this.seed=Math.random()*100;this.baseY=0;
-  this.T={};this.P=null;this.make();
+  this.touchCD=0;this.T={};this.P=null;this.make();
   if(!this.preview){const el=document.createElement('div');el.className='tag';el.hidden=true;el.innerHTML='<span class="bub" hidden></span><span class="nm" hidden></span>';$('#labels').appendChild(el);this.label=el;}
  }
  make(){
@@ -611,6 +617,13 @@ class Person{
   const k=clamp(.7+sp*.9,.7,2.3);this.push.set(nx*k,nz*k);this.stumble.set(nx,nz);
   this.state='stumble';this.actT=.85;this.say(pick(BUMP));this.lookPlayer(3.5);
  }
+ touched(part){
+  this.touchCD=2.2;this.lookPlayer(3);
+  if(this.act==='wave'||this.sitAct==='wave'){this.say('High five!');beep(880,.08);return;}
+  this.say(pick(part==='head'?HEADTOUCH:TOUCH));beep(440,.05);
+  if(this.isSeatedLocked()){this.flinch=.9;return;}
+  if(this.state==='idle'||this.state==='act'||this.state==='listen'){this.faceTarget=this.angleTo(W.player.x,W.player.z);this.startAct(Math.random()<.5?'shrug':'wave',1.6);}
+ }
  // ---- per frame
  update(dt,t){
   this.yawRate=0;
@@ -619,7 +632,7 @@ class Person{
   this.animate(dt,t);
  }
  think(dt){
-  this.bumpCD-=dt;this.sitCD-=dt;this.flinch=Math.max(0,this.flinch-dt);
+  this.bumpCD-=dt;this.sitCD-=dt;this.touchCD-=dt;this.flinch=Math.max(0,this.flinch-dt);
   if(this.bubbleT>0)this.bubbleT-=dt;if(this.talkT>0)this.talkT-=dt;
   if(this.sayQ){this.sayQ.t-=dt;if(this.sayQ.t<=0){this.say(this.sayQ.text);this.sayQ=null;}}
   if(this.queueAct){this.queueAct.t-=dt;if(this.queueAct.t<=0){const q=this.queueAct;this.queueAct=null;if(this.state==='listen'||this.state==='idle')this.startAct(q.name,q.dur);}}
@@ -857,7 +870,7 @@ function spawnPerson(cfg,x,z,h=0){const p=new Person(clone(cfg));p.pos.set(x,z);
 function setupDemoWorld(){clearPeople();clearSeatMarkers();W.map=DEMO_MAP;W.seats=DEMO_SEATS.map(s=>({...s,occ:null}));W.floorY=0;
  const spots=[[-.8,.4],[.9,-.1],[.2,1.3]];roster.slice(0,3).forEach((c,i)=>{const p=spawnPerson(c,spots[i][0],spots[i][1],rand(-3,3));p.timer=rand(.5,2.5);});}
 function applyLook(){
- room.visible=true;shadowPlane.visible=false;video.style.display='none';
+ room.visible=true;shadowPlane.visible=false;
  world.background=new THREE.Color('#14161c');hemi.intensity=.35;sun.intensity=2.4;
  reticle.visible=false;dots.visible=false;
  $('#stick').hidden=!(mode==='demo'||mode==='motion');
@@ -876,19 +889,20 @@ async function startMotion(){
 function stopCam(){if(camStream){camStream.getTracks().forEach(t=>t.stop());camStream=null;}video.srcObject=null;}
 async function startXR(){
  try{
-  const session=await navigator.xr.requestSession('immersive-ar',{optionalFeatures:['dom-overlay','local-floor'],domOverlay:{root:$('#ui')}});
+  const session=await navigator.xr.requestSession('immersive-ar',{optionalFeatures:['dom-overlay','local-floor','camera-access'],domOverlay:{root:$('#ui')}});
   renderer.xr.setReferenceSpaceType('local');await renderer.xr.setSession(session);
   let base,floor=true;try{base=await session.requestReferenceSpace('local-floor');}catch(e){floor=false;base=await session.requestReferenceSpace('local');}
   // put you in the room behind the rug, facing the couch; your real movement moves you through it
   xr.ref=base.getOffsetReferenceSpace(new XRRigidTransform({x:0,y:floor?0:-1.45,z:-1.9}));renderer.xr.setReferenceSpace(xr.ref);
   xr.session=session;xr.sources=[];session.addEventListener('end',onXREnd);
+  try{xr.binding=new XRWebGLBinding(session,renderer.getContext());}catch(e){xr.binding=null;}
   mode='xr';W.mode='xr';if(!W.people.length)setupDemoWorld();
   applyLook();setTool('place');showScreen('hud');renderTray();
   toastOnce('xr','Walk around and move your phone to look. Tap the floor to send people places.');
  }catch(e){toast("Motion tracking didn't start here, so turning your phone steers instead.");await startMotion();}
 }
-function onXREnd(){xr.sources.forEach(s=>{try{s.cancel();}catch(e){}});xr.session=null;xr.sources=[];renderer.setSize(innerWidth,innerHeight,false);if(mode==='xr')enterMenu();}
-function exitToMenu(){if(cr.open)closeCreator(true);if(xr.session){mode='menu';xr.session.end();enterMenu();return;}stopCam();enterMenu();}
+function onXREnd(){setHands(false);xr.binding=null;xr.sources.forEach(s=>{try{s.cancel();}catch(e){}});xr.session=null;xr.sources=[];renderer.setSize(innerWidth,innerHeight,false);if(mode==='xr')enterMenu();}
+function exitToMenu(){setHands(false);if(cr.open)closeCreator(true);if(xr.session){mode='menu';xr.session.end();enterMenu();return;}stopCam();enterMenu();}
 
 /* ================= per-frame world ================= */
 const ctrl=renderer.xr.getController(0);world.add(ctrl);
@@ -901,6 +915,9 @@ ctrl.addEventListener('select',()=>{
 function xrFrame(frame){
  if(!frame||!xr.ref)return;const pose=frame.getViewerPose(xr.ref);
  if(pose){const p=pose.transform.position,o=pose.transform.orientation;W.player.set(p.x,p.y,p.z);xr.fwd.set(0,0,-1).applyQuaternion(qView.set(o.x,o.y,o.z,o.w));}
+ if(pose&&HANDS.on&&HANDS.lm&&xr.binding&&performance.now()-HANDS.lastDet>66){const view=pose.views[0];
+  if(view&&view.camera){HANDS.lastDet=performance.now();const img=readXRCamera(view.camera);
+   if(img){try{const r=HANDS.lm.detectForVideo(img,HANDS.lastDet);const xc=renderer.xr.getCamera().cameras[0]||camera;applyHandResult(r,xc,(x,y)=>[x*2-1,1-y*2]);}catch(e){}}}}
 }
 function classifyHit(pos,horiz){
  const camY=W.player.y;
@@ -1086,6 +1103,111 @@ function beep(f,d){if(!actx)return;try{const o=actx.createOscillator(),g=actx.cr
 function bumpFX(){try{navigator.vibrate&&navigator.vibrate(40);}catch(e){}const f=$('#flash');f.classList.add('hit');setTimeout(()=>f.classList.remove('hit'),60);
  if(actx){try{const o=actx.createOscillator(),g=actx.createGain();o.type='triangle';o.frequency.setValueAtTime(150,actx.currentTime);o.frequency.exponentialRampToValueAtTime(55,actx.currentTime+.18);g.gain.setValueAtTime(.25,actx.currentTime);g.gain.exponentialRampToValueAtTime(.0001,actx.currentTime+.22);o.connect(g).connect(actx.destination);o.start();o.stop(actx.currentTime+.25);}catch(e){}}}
 
+/* ================= hands ================= */
+const MP='https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14';
+const HAND_MODEL='https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task';
+const HANDS={on:false,loading:false,lm:null,lastDet:0,rigs:[],skin:3,stream:null,gl:null};
+try{const v=localStorage.getItem('roommates.handSkin');if(v!==null&&+v>=0&&+v<SKIN.length)HANDS.skin=+v;}catch(e){}
+const FINGER=[[0,1,2,3,4],[0,5,6,7,8],[5,9,10,11,12],[9,13,14,15,16],[13,17,18,19,20]];
+const FING_R=[.0112,.0094,.0097,.009,.0078];
+const PALM_B=[[0,5],[0,9],[0,13],[0,17],[5,9],[9,13],[13,17],[1,5],[0,2]];
+const UPV=new THREE.Vector3(0,1,0);
+class HandRig{
+ constructor(){
+  this.g=new THREE.Group();this.g.visible=false;world.add(this.g);
+  this.mat=new THREE.MeshPhysicalMaterial({color:SKIN[HANDS.skin],roughness:.5,sheen:.35,sheenRoughness:.5,sheenColor:new THREE.Color('#ff8f73')});
+  const sg=new THREE.SphereGeometry(1,14,10),cg=new THREE.CylinderGeometry(1,1,1,14,1,true);
+  const jr=new Array(21).fill(.008);this.bones=[];
+  FINGER.forEach((ch,f)=>{for(let k=0;k<4;k++){const a=ch[k],b=ch[k+1];if(f>0&&k===0)continue;const r=FING_R[f]*(1-.1*k);this.bones.push({a,b,r});jr[b]=Math.max(jr[b],r*(k===3?.95:1.04));jr[a]=Math.max(jr[a],r*1.04);}});
+  for(const[a,b]of PALM_B)this.bones.push({a,b,r:.017});for(const i of[0,5,9,13,17])jr[i]=.018;
+  this.jr=jr;this.j=jr.map(()=>{const m=new THREE.Mesh(sg,this.mat);m.castShadow=true;this.g.add(m);return m;});
+  for(const bn of this.bones){bn.m=new THREE.Mesh(cg,this.mat);bn.m.castShadow=true;this.g.add(bn.m);}
+  this.cam=Array.from({length:21},()=>new THREE.Vector3());this.tgt=Array.from({length:21},()=>new THREE.Vector3());this.w=Array.from({length:21},()=>new THREE.Vector3());
+  this.has=false;this.lastSeen=0;
+ }
+ place(camObj,dt){
+  const k=1-Math.exp(-24*dt);
+  for(let i=0;i<21;i++){this.cam[i].lerp(this.tgt[i],k);this.w[i].copy(this.cam[i]).applyMatrix4(camObj.matrixWorld);this.j[i].position.copy(this.w[i]);this.j[i].scale.setScalar(this.jr[i]);}
+  for(const bn of this.bones){const A=this.w[bn.a],B=this.w[bn.b];tv.subVectors(B,A);const len=tv.length();if(len<1e-5)continue;bn.m.position.addVectors(A,B).multiplyScalar(.5);bn.m.quaternion.setFromUnitVectors(UPV,tv.divideScalar(len));bn.m.scale.set(bn.r,len,bn.r);}
+ }
+}
+function getRig(i){while(HANDS.rigs.length<=i)HANDS.rigs.push(new HandRig());return HANDS.rigs[i];}
+function applyHandResult(res,cam,mapFn){
+ const now=performance.now(),e0=cam.projectionMatrix.elements[0],e5=cam.projectionMatrix.elements[5];
+ const n=Math.min(2,(res&&res.landmarks)?res.landmarks.length:0);
+ for(let h=0;h<n;h++){
+  const L=res.landmarks[h],Wl=res.worldLandmarks[h];if(!Wl||Wl.length<21)continue;const rig=getRig(h);
+  const nd=L.map(q=>mapFn(q.x,q.y));
+  // how far away the hand is: compare its real palm size with how big it looks on screen
+  let num=0,den=0;for(const[a,b]of[[0,5],[0,17],[5,17],[0,9],[5,9],[9,17]]){num+=Math.hypot(e0*(Wl[b].x-Wl[a].x),e5*(Wl[b].y-Wl[a].y));den+=Math.hypot(nd[b][0]-nd[a][0],nd[b][1]-nd[a][1]);}
+  if(den<1e-4)continue;const D=clamp(num/den,.15,.9),c=9,cx=nd[c][0]*D/e0,cy=nd[c][1]*D/e5;
+  for(let i=0;i<21;i++)rig.tgt[i].set(cx+(Wl[i].x-Wl[c].x),cy-(Wl[i].y-Wl[c].y),-D-(Wl[i].z-Wl[c].z));
+  if(!rig.has||now-rig.lastSeen>400)for(let i=0;i<21;i++)rig.cam[i].copy(rig.tgt[i]);
+  rig.has=true;rig.lastSeen=now;
+ }
+}
+function videoMap(){const vw=video.videoWidth||640,vh=video.videoHeight||480,Wd=innerWidth,Hd=innerHeight,sc=Math.max(Wd/vw,Hd/vh),ox=(vw*sc-Wd)/2,oy=(vh*sc-Hd)/2;
+ return(x,y)=>{const sx=(x*vw*sc-ox)/Wd,sy=(y*vh*sc-oy)/Hd;return[sx*2-1,1-sy*2];};}
+function readXRCamera(xcam){
+ const gl=renderer.getContext();let tex;try{tex=xr.binding.getCameraImage(xcam);}catch(e){return null;}if(!tex)return null;
+ const DW=192,DH=Math.max(64,Math.round(192*(xcam.height||16)/(xcam.width||9)));let G=HANDS.gl;
+ if(!G||G.w!==DW||G.h!==DH){
+  G={w:DW,h:DH};const sh=(type,src)=>{const o=gl.createShader(type);gl.shaderSource(o,src);gl.compileShader(o);return o;};
+  G.prog=gl.createProgram();gl.attachShader(G.prog,sh(gl.VERTEX_SHADER,'#version 300 es\nin vec2 p;out vec2 uv;void main(){uv=p*.5+.5;gl_Position=vec4(p,0.,1.);}'));
+  gl.attachShader(G.prog,sh(gl.FRAGMENT_SHADER,'#version 300 es\nprecision mediump float;in vec2 uv;uniform sampler2D t;out vec4 o;void main(){o=texture(t,uv);}'));
+  gl.bindAttribLocation(G.prog,0,'p');gl.linkProgram(G.prog);G.loc=gl.getUniformLocation(G.prog,'t');
+  G.vao=gl.createVertexArray();gl.bindVertexArray(G.vao);const vb=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,vb);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,-1,1,1,-1,1,1]),gl.STATIC_DRAW);gl.enableVertexAttribArray(0);gl.vertexAttribPointer(0,2,gl.FLOAT,false,0,0);
+  G.tex=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,G.tex);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,DW,DH,0,gl.RGBA,gl.UNSIGNED_BYTE,null);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);
+  G.fbo=gl.createFramebuffer();gl.bindFramebuffer(gl.FRAMEBUFFER,G.fbo);gl.framebufferTexture2D(gl.FRAMEBUFFER,gl.COLOR_ATTACHMENT0,gl.TEXTURE_2D,G.tex,0);
+  G.buf=new Uint8Array(DW*DH*4);G.img=new ImageData(DW,DH);HANDS.gl=G;
+ }
+ gl.bindFramebuffer(gl.FRAMEBUFFER,G.fbo);gl.viewport(0,0,DW,DH);gl.disable(gl.DEPTH_TEST);gl.disable(gl.BLEND);gl.disable(gl.CULL_FACE);gl.disable(gl.SCISSOR_TEST);
+ gl.useProgram(G.prog);gl.bindVertexArray(G.vao);gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,tex);gl.uniform1i(G.loc,0);gl.drawArrays(gl.TRIANGLES,0,6);
+ gl.readPixels(0,0,DW,DH,gl.RGBA,gl.UNSIGNED_BYTE,G.buf);gl.bindVertexArray(null);renderer.resetState();
+ const d=G.img.data,row=DW*4;for(let y=0;y<DH;y++)d.set(G.buf.subarray((DH-1-y)*row,(DH-y)*row),y*row);
+ return G.img;
+}
+async function initHands(){
+ if(HANDS.lm)return true;if(HANDS.loading)return false;HANDS.loading=true;toast('Loading hand tracking…');
+ try{
+  const mp=await import(MP+'/vision_bundle.mjs');const fs=await mp.FilesetResolver.forVisionTasks(MP+'/wasm');
+  const opts=d=>({baseOptions:{modelAssetPath:HAND_MODEL,delegate:d},runningMode:'VIDEO',numHands:2,minHandDetectionConfidence:.5,minHandPresenceConfidence:.5,minTrackingConfidence:.5});
+  try{HANDS.lm=await mp.HandLandmarker.createFromOptions(fs,opts('GPU'));}catch(e){HANDS.lm=await mp.HandLandmarker.createFromOptions(fs,opts('CPU'));}
+  HANDS.loading=false;return true;
+ }catch(e){HANDS.loading=false;toast("Hand tracking couldn't load here. It works on the hosted site.");return false;}
+}
+function stopHandCam(){if(HANDS.stream){HANDS.stream.getTracks().forEach(t=>t.stop());HANDS.stream=null;video.srcObject=null;}}
+function renderHandButtons(){const b=$('#toolHands');b.innerHTML=svg('hand')+(HANDS.on?'Hands on':'Hands');b.classList.toggle('on',HANDS.on);b.setAttribute('aria-pressed',String(HANDS.on));
+ $('#toolSkin').innerHTML=`<span class="skin-dot" style="background:${SKIN[HANDS.skin]}"></span>Skin`;}
+async function setHands(on){
+ if(!on){HANDS.on=false;stopHandCam();for(const r of HANDS.rigs){r.g.visible=false;r.has=false;}renderHandButtons();return;}
+ if(mode==='xr'){
+  const ef=xr.session&&xr.session.enabledFeatures;
+  if(!xr.binding||(ef&&!ef.includes('camera-access'))){toast("Your phone didn't share its camera with this AR session. Try Touch controls to use hands.");return;}
+ }else{
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){toast("This browser can't use the camera, so hands aren't available.");return;}
+  try{HANDS.stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:640},height:{ideal:480}},audio:false});video.srcObject=HANDS.stream;await video.play().catch(()=>{});}
+  catch(e){toast("Hands need your camera. Allow camera access, or open the hosted site.");return;}
+ }
+ if(!(await initHands())){stopHandCam();return;}
+ HANDS.on=true;renderHandButtons();toastOnce('hands','Hold a hand up in front of your phone. Try touching someone.');
+}
+function updateHands(dt){
+ if(!HANDS.on)return;const now=performance.now();
+ if(mode!=='xr'&&HANDS.lm&&video.readyState>=2&&now-HANDS.lastDet>45){HANDS.lastDet=now;try{applyHandResult(HANDS.lm.detectForVideo(video,now),camera,videoMap());}catch(e){}}
+ const camObj=mode==='xr'?(renderer.xr.getCamera().cameras[0]||camera):camera;
+ for(const rig of HANDS.rigs){
+  if(!rig.has||now-rig.lastSeen>350){rig.g.visible=false;continue;}
+  rig.g.visible=true;rig.place(camObj,dt);
+  for(const p of W.people){if(p.touchCD>0)continue;const locked=p.isSeatedLocked();let bx=p.pos.x,bz=p.pos.y;if(locked&&p.seat&&p.sitT>.4){bx=p.seat.x;bz=p.seat.z;}
+   const Hh=p.av.H*(locked?.72:1);
+   for(const i of[4,8,12,16,20,9,0]){const q=rig.w[i],dy=q.y-W.floorY;if(dy<0||dy>Hh+.05)continue;if(Math.hypot(q.x-bx,q.z-bz)<.24){p.touched(dy>Hh-.27?'head':'body');break;}}}
+ }
+}
+$('#toolHands').addEventListener('click',()=>{initAudio();setHands(!HANDS.on);});
+$('#toolSkin').addEventListener('click',()=>{HANDS.skin=(HANDS.skin+1)%SKIN.length;try{localStorage.setItem('roommates.handSkin',String(HANDS.skin));}catch(e){}for(const r of HANDS.rigs)r.mat.color.set(SKIN[HANDS.skin]);renderHandButtons();});
+renderHandButtons();
+
 /* ================= creator ================= */
 const TABS=[
  {id:'body',label:'Body',items:[
@@ -1214,6 +1336,7 @@ renderer.setAnimationLoop((time,frame)=>{
  if(cr.open&&!cr.inXR){creatorTick(dt,t);renderCreator(dt,t);return;}
  updateWorld(dt,t,frame);
  if(cr.open&&cr.inXR)creatorTick(dt,t);
+ if(mode!=='menu')updateHands(dt);
  renderer.render(world,camera);updateLabels();
  statusT-=dt;if(statusT<=0&&mode!=='menu'){statusT=.25;updateStatus();}
 });
