@@ -4,7 +4,7 @@ A sideways (landscape) robbery game. You're a robber in a life-size city: grab a
 
 Play: https://treyyy-dev.github.io/Death-Avenue/
 
-Tap Start. The first time, you make your character; after that you go straight into the city. Hold your phone sideways: the left stick moves you (push it all the way to run) and dragging anywhere else looks around. On a computer, use WASD to move, drag to look, E to interact, F or Space to shoot and R to reload.
+Tap Start. The first time, you make your character; after that you go straight into the city. The game always plays sideways and full screen (on iPhone, add it to your Home Screen for full screen); if you hold the phone upright, the game turns itself sideways. On a phone, the left stick moves you (push it all the way to run) and dragging anywhere else looks around. On a computer, use WASD to move, drag to look, E to interact, F or Space to shoot and R to reload.
 
 The city: your house (with your crew, Jordan and Maya), First City Bank, Fresh Market, the Gas & Go, Central Station with a train, two apartment buildings, the police station, and eight stores: two gun stores (Lock & Load, Avenue Arms), two barbershops (Fades, Clean Cuts), two clothing stores (Threads, Drip Co.) and two shoe stores (Kicks Corner, Sole City). Around 30 people live in it: clerks, a bank teller, barbers, patrol cops and people walking around.
 
