@@ -44,7 +44,8 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
   background:linear-gradient(to bottom,rgba(12,14,19,0) 18%,rgba(12,14,19,.55) 45%,rgba(12,14,19,.94) 72%,var(--ink));
   padding:calc(24px + env(safe-area-inset-top,0px)) max(20px,env(safe-area-inset-right,0px)) calc(26px + env(safe-area-inset-bottom,0px)) max(20px,env(safe-area-inset-left,0px))}
 .menu-card{max-width:440px;width:100%;margin:0 auto;display:grid;gap:14px;position:relative;z-index:2}
-.menu-top{max-width:440px;width:100%;margin:0 auto;display:grid;gap:10px;position:relative;z-index:2;padding-top:6px}
+.menu-top{box-sizing:border-box;max-width:440px;width:100%;margin:0 auto;display:grid;justify-items:center;text-align:center;position:relative;z-index:2;padding:4px 52px 0}
+#menu h1{font-size:clamp(50px,14.5vw,88px)}
 #menuArt{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 45%;z-index:0;opacity:0;transition:opacity .8s;transform-origin:50% 45%}
 #menu.has-art #menuArt{opacity:1;animation:kenburns 22s ease-in-out infinite alternate}
 #menu::before{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;opacity:0;transition:opacity .8s;
@@ -112,7 +113,7 @@ h1 span{color:var(--siren)}
 .act.danger{color:var(--danger)}
 .talk{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(30px + env(safe-area-inset-bottom,0px));display:grid;justify-items:center;gap:10px}
 #hud:has(#sheet:not([hidden])) .talk{bottom:calc(310px + env(safe-area-inset-bottom,0px))}
-#hud:has(#talkBar:not([hidden])) .talk,#hud:has(#aiSheet:not([hidden])) .talk{display:none}
+#hud:has(#talkBar:not([hidden])) .talk{display:none}
 .mic{width:68px;height:68px;border-radius:50%;border:0;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;box-shadow:0 10px 26px rgba(0,0,0,.35);position:relative;padding:0}
 .mic svg{width:28px;height:28px}
 .mic.listening{background:#ff7a7a;color:#2a0d0d}
@@ -130,18 +131,18 @@ h1 span{color:var(--siren)}
 #talkBar{position:fixed;left:0;right:0;bottom:0;display:flex;gap:8px;align-items:center;background:var(--solid);border-top:1px solid var(--line);
   padding:12px max(12px,env(safe-area-inset-right,0px)) calc(12px + env(safe-area-inset-bottom,0px)) max(12px,env(safe-area-inset-left,0px))}
 #talkBar input{flex:1;min-width:0}
-#aiSheet{position:fixed;left:0;right:0;bottom:0;border-radius:24px 24px 0 0;background:var(--solid);border-top:1px solid var(--line);display:grid;gap:12px;
+#settings{position:fixed;left:0;right:0;bottom:0;z-index:5;max-height:88vh;overflow-y:auto;overscroll-behavior:contain;touch-action:pan-y;border-radius:24px 24px 0 0;background:var(--solid);border-top:1px solid var(--line);display:grid;gap:12px;align-content:start;
   padding:16px max(16px,env(safe-area-inset-right,0px)) calc(14px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
-#aiSheet input{width:100%;background:var(--raise);border:1px solid var(--line);border-radius:12px;padding:13px 14px;font:600 16px var(--body);color:var(--fg)}
+#settings input{width:100%;background:var(--raise);border:1px solid var(--line);border-radius:12px;padding:13px 14px;font:600 16px var(--body);color:var(--fg)}
 .row{display:flex;gap:8px;flex-wrap:wrap}
 .prog{height:8px;border-radius:99px;background:var(--raise);overflow:hidden}
 .prog i{display:block;height:100%;width:0;background:var(--mint);transition:width .3s}
-#aiSheet details{border-top:1px solid var(--line);padding-top:10px}
-#aiSheet summary{font:700 14px var(--body);color:var(--accent);cursor:pointer;padding:4px 0}
-#aiSheet details[open] summary{margin-bottom:10px}
-#aiSheet details > *:not(summary){margin-top:8px}
+#settings details{border-top:1px solid var(--line);padding-top:10px}
+#settings summary{font:700 14px var(--body);color:var(--accent);cursor:pointer;padding:4px 0}
+#settings details[open] summary{margin-bottom:10px}
+#settings details > *:not(summary){margin-top:8px}
 .gunbtns{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(172px + env(safe-area-inset-bottom,0px));display:grid;justify-items:center;gap:10px}
-#hud:has(#sheet:not([hidden])) .gunbtns,#hud:has(#talkBar:not([hidden])) .gunbtns,#hud:has(#aiSheet:not([hidden])) .gunbtns{display:none}
+#hud:has(#sheet:not([hidden])) .gunbtns,#hud:has(#talkBar:not([hidden])) .gunbtns{display:none}
 .gb{width:60px;height:60px;border-radius:50%;display:grid;place-items:center;align-content:center;gap:2px;padding:0;font:700 9.5px var(--body)}
 .gb svg{width:22px;height:22px}
 .shoot{width:80px;height:80px;border-radius:50%;border:0;background:#e5483d;color:#fff;font:800 11px var(--body);display:grid;place-items:center;align-content:center;gap:2px;box-shadow:0 10px 26px rgba(0,0,0,.35);touch-action:none;-webkit-user-select:none;user-select:none}
@@ -153,7 +154,18 @@ h1 span{color:var(--siren)}
 #crosshair.hit::before,#crosshair.hit::after{background:#ff4a3d}
 #gunChip{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(160px + env(safe-area-inset-bottom,0px));border-radius:999px;padding:8px 14px;display:flex;gap:10px;align-items:baseline;font:600 13px var(--body);white-space:nowrap;cursor:pointer}
 #gunChip b{font:800 14px var(--display)}#gunAmmo{font-variant-numeric:tabular-nums;color:var(--dim)}
-.start{justify-content:center;background:var(--siren);color:#fff;border-color:transparent;font:800 22px/1 var(--display);letter-spacing:.08em;text-transform:uppercase;padding:21px 18px;box-shadow:0 14px 40px rgba(255,61,61,.35)}
+.start{justify-content:center;justify-self:center;background:none;border:0;box-shadow:none;outline:none;-webkit-tap-highlight-color:transparent;color:#fff;font:800 clamp(30px,9vw,42px)/1 var(--display);letter-spacing:.16em;text-transform:uppercase;padding:18px 40px;text-shadow:0 0 18px rgba(255,61,61,.75),0 4px 18px rgba(0,0,0,.7);animation:breathe 2.4s ease-in-out infinite}
+.start:focus,.start:focus-visible,.start:active{outline:none;background:none;box-shadow:none}
+@keyframes breathe{50%{opacity:.62}}
+.gear{position:absolute;z-index:3;top:calc(18px + env(safe-area-inset-top,0px));right:max(16px,env(safe-area-inset-right,0px));width:46px;height:46px;padding:0;display:grid;place-items:center;border-radius:12px;
+  background:rgba(12,14,19,.45);border:1.5px solid rgba(242,241,238,.75);color:#fff;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.gear svg{width:24px;height:24px}
+.set-sec{display:grid;gap:10px;border-top:1px solid var(--line);padding-top:14px}
+.set-sec .label{display:flex;justify-content:space-between;align-items:center}
+.gbtn{display:flex;align-items:center;justify-content:center;gap:10px;background:#fff;color:#1f1f1f;border:0;border-radius:14px;padding:14px;font:700 15px var(--body)}
+.gbtn svg{width:20px;height:20px}
+.soon{font:700 10.5px var(--body);letter-spacing:.06em;text-transform:uppercase;color:var(--warn)}
+.danger-btn{background:none;border:1px solid rgba(255,138,128,.45);color:var(--danger);border-radius:14px;padding:12px 16px;font:700 14px var(--body)}
 .money{flex:none;border-radius:999px;padding:8px 15px;display:grid;justify-items:end;align-content:center;min-height:46px;box-sizing:border-box;line-height:1.05}
 .money b{font:800 18px var(--display);color:var(--mint);font-variant-numeric:tabular-nums}
 .money small{font:700 11px var(--body);color:var(--warn);font-variant-numeric:tabular-nums}
@@ -234,6 +246,7 @@ input[type=text]{width:100%;background:var(--raise);border:1px solid var(--line)
     <div class="menu-top">
       <h1>Death<br><span>Avenue</span></h1>
     </div>
+    <button id="btnSettings" class="gear" aria-label="Settings"></button>
     <div class="menu-card">
       <button id="btnStart" class="btn start">Start</button>
     </div>
@@ -249,7 +262,6 @@ input[type=text]{width:100%;background:var(--raise);border:1px solid var(--line)
       <button class="tool glass" id="toolHands" aria-pressed="false"></button>
       <button class="tool glass on" id="toolBlood" aria-label="Turn blood on or off"></button>
       <button class="tool glass" id="toolMe" aria-label="Edit your character"></button>
-      <button class="tool glass" id="toolBrain" aria-label="Brain settings for talking"></button>
     </div>
     <div id="stick" class="block"><div id="knob"></div></div>
     <div id="sheet" class="block" hidden>
@@ -274,12 +286,23 @@ input[type=text]{width:100%;background:var(--raise);border:1px solid var(--line)
       <button class="save" type="submit">Send</button>
       <button class="done" type="button" id="talkClose">Close</button>
     </form>
-    <div id="aiSheet" class="block" hidden>
-      <div class="sheet-head"><div><strong>Their brain</strong><em id="brainState">Free and unlimited</em></div><button class="done" id="aiClose" type="button">Close</button></div>
-      <p class="hint" id="brainText">Your people think with a small AI that runs right on this phone. It's free and unlimited for everyone who plays. It downloads once, then works offline. Use Wi-Fi for the download.</p>
+    <div id="busted" hidden><strong>Busted</strong><p id="bustedLost"></p></div>
+  </section>
+
+  <section id="settings" class="block" hidden aria-label="Settings">
+    <div class="sheet-head"><div><strong>Settings</strong><em>Saved on this phone</em></div><button class="done" id="setClose" type="button">Done</button></div>
+    <div class="set-sec">
+      <span class="label">Account <span class="soon">Coming soon</span></span>
+      <button class="gbtn" id="btnGoogle" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="3.6"/><path d="M5 20c.8-3.6 3.6-5.6 7-5.6s6.2 2 7 5.6"/></svg>Sign in with Google</button>
+      <p class="hint">Sign-in will save your money and character to your account so you can play on any phone.</p>
+    </div>
+    <div class="set-sec">
+      <span class="label">Talking brain <em id="brainState" style="font:600 12px var(--body);color:var(--dim);font-style:normal;letter-spacing:0;text-transform:none">Free and unlimited</em></span>
+      <p class="hint" id="brainText">People in the city talk back with a small AI that runs right on this phone. It's free and unlimited, downloads once, then works offline. Use Wi-Fi for the download.</p>
       <div class="seg" id="brainSizes"><button type="button" data-size="light">Light · ~300 MB</button><button type="button" data-size="standard">Standard · ~800 MB</button></div>
       <div class="prog" id="brainProg" hidden><i></i></div>
       <button class="save" id="brainGo" type="button">Download brain</button>
+      <button class="danger-btn" id="brainDel" type="button" hidden>Delete brain from this phone</button>
       <details id="claudeBox">
         <summary>Use Claude instead (smarter, needs a key)</summary>
         <p class="hint">Paste a Claude API key from console.anthropic.com. It's saved only on this phone, and each reply costs a fraction of a cent on your API account. Other players keep using the free built-in brain.</p>
@@ -287,7 +310,11 @@ input[type=text]{width:100%;background:var(--raise);border:1px solid var(--line)
         <div class="row"><button class="save" id="aiSave" type="button">Save key</button><button class="done" id="aiForget" type="button">Remove key</button></div>
       </details>
     </div>
-    <div id="busted" hidden><strong>Busted</strong><p id="bustedLost"></p></div>
+    <div class="set-sec">
+      <span class="label">Frame rate</span>
+      <div class="seg" id="fpsSeg"><button type="button" data-fps="30">30</button><button type="button" data-fps="60">60</button><button type="button" data-fps="90">90</button><button type="button" data-fps="120">120</button></div>
+      <p class="hint">Lower saves battery. 90 and 120 only work on phones with a fast screen.</p>
+    </div>
   </section>
 
   <section id="creator" class="block" hidden>
@@ -361,6 +388,7 @@ const IC={
  edit:'<path d="M4 20h4L19 9l-4-4L4 16v4zM13.5 6.5l4 4"/>',
  remove:'<path d="M6 6l12 12M18 6L6 18"/>',
  user:'<circle cx="12" cy="8" r="3.6"/><path d="M5 20c.8-3.6 3.6-5.6 7-5.6s6.2 2 7 5.6"/>',
+ gear:'<circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>',
  chat:'<path d="M5 5h14a1.5 1.5 0 0 1 1.5 1.5v8A1.5 1.5 0 0 1 19 16h-8l-4 3.5V16H5a1.5 1.5 0 0 1-1.5-1.5v-8A1.5 1.5 0 0 1 5 5z"/><path d="M8 10.5h.01M12 10.5h.01M16 10.5h.01"/>'
 };
 const svg=n=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${IC[n]}</svg>`;
@@ -1230,7 +1258,7 @@ let camStream=null;
 
 function clearPeople(){for(const p of[...W.people])p.dispose();W.people=[];W.selected=null;selRing.visible=false;}
 function spawnPerson(cfg,x,z,h=0,role='walker'){const p=new Person(clone(cfg));p.role=role;p.pos.set(x,z);p.lastX=x;p.lastZ=z;p.heading=h;p.root.position.set(x,W.floorY,z);world.add(p.root);W.people.push(p);return p;}
-function showScreen(s){$('#menu').hidden=s!=='menu';$('#hud').hidden=s!=='hud';$('#creator').hidden=s!=='creator';$('#labels').hidden=s!=='hud';}
+function showScreen(s){if(s!=='menu')$('#settings').hidden=true;$('#menu').hidden=s!=='menu';$('#hud').hidden=s!=='hud';$('#creator').hidden=s!=='creator';$('#labels').hidden=s!=='hud';}
 function enterMenu(){mode='menu';W.mode='menu';showScreen('menu');closeSheet();}
 function hasMe(){try{return localStorage.getItem(ME_KEY)!==null;}catch(e){return true;}}
 async function startGame(){
@@ -1269,7 +1297,7 @@ function onXREnd(){setHands(false);xr.binding=null;xr.session=null;xr.sources=[]
  // carry your spot back to the phone-steer camera
  camera.position.set(W.player.x,1.6,W.player.z);look.yaw=Math.atan2(-xr.fwd.x,-xr.fwd.z);ori.offset=null;
  renderer.setSize(innerWidth,innerHeight,false);if(mode==='xr')enterMenu();}
-function exitToMenu(){setHands(false);stopTalk();caption(null);$('#talkBar').hidden=true;$('#aiSheet').hidden=true;if(cr.open)closeCreator(true);
+function exitToMenu(){setHands(false);stopTalk();caption(null);$('#talkBar').hidden=true;if(cr.open)closeCreator(true);
  if(xr.session){mode='menu';xr.session.end();enterMenu();return;}stopCam();enterMenu();}
 function teleport(x,z,yaw){
  if(mode==='xr'&&xr.base){xr.off.x+=x-W.player.x;xr.off.z+=z-W.player.z;setXRRef();W.player.x=x;W.player.z=z;}
@@ -1381,7 +1409,7 @@ function toastOnce(k,msg){if(seen.has(k))return;seen.add(k);toast(msg);}
 function faceStyle(c){return `--a:${SKIN[c.skin]??SKIN[3]};--b:${c.topColor}`;}
 function esc(s){return String(s).replace(/[&<>"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));}
 $('#btnExit').innerHTML=svg('back');
-$('#toolMe').innerHTML=svg('user')+'<span>You</span>';$('#toolBrain').innerHTML=svg('chat')+'<span>Brain</span>';
+$('#toolMe').innerHTML=svg('user')+'<span>You</span>';
 const ACTIONS=[['come','Come here'],['follow','Follow me'],['seat','Sit down'],['wave','Wave'],['dance','Dance'],['phone','Phone']];
 function openSheet(){const p=W.selected;if(!p)return;$('#sheet').hidden=false;
  $('#acts').innerHTML=ACTIONS.map(([k,l])=>`<button class="act" data-a="${k}">${svg(k)}${l}</button>`).join('');
@@ -2060,8 +2088,9 @@ async function askAI(p,text,signal,onText){
  const hist=TALK.hist.get(p)||[];hist.push({role:'user',content:text});while(hist.length>14)hist.shift();if(hist[0].role!=='user')hist.shift();TALK.hist.set(p,hist);
  const mode=await brainMode();let reply;
  if(mode==='script'){toastOnce('script',"This phone can't run the built-in AI, so people give simple replies.");reply=scriptedReply(p,text);}
- else if(mode==='local'||mode==='ask'){try{reply=await localReply(p,hist,signal,onText);}catch(e){if(e&&e.code==='cancelled')throw e;
-   toastOnce('brainfail',e&&e.code==='brain_memory'?"This phone ran out of memory for the brain. Try the Light size in Brain.":"The built-in brain couldn't start here, so people give simple replies for now.");reply=scriptedReply(p,text);}}
+ else if(mode==='ask'){toastOnce('nobrain','People give simple replies until you download a brain in Settings on the start screen.');reply=scriptedReply(p,text);}
+ else if(mode==='local'){try{reply=await localReply(p,hist,signal,onText);}catch(e){if(e&&e.code==='cancelled')throw e;
+   toastOnce('brainfail',e&&e.code==='brain_memory'?"This phone ran out of memory for the brain. Try the Light size in Settings.":"The built-in brain couldn't start here, so people give simple replies for now.");reply=scriptedReply(p,text);}}
  else if(mode==='sample'){const sample=await getSample();const r=await sample([{role:'user',content:personaFor(p)},...hist],{modelTier:'quick',cache:false,signal,onText:({text})=>onText&&onText(text)});reply=r.text;}
  else{const key=aiKey();if(!key)throw{code:'no_ai'};
   const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',signal,headers:{'content-type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
@@ -2084,8 +2113,8 @@ async function sendLine(text){
   showReply(p,reply,()=>{p.chatHold=20;if(!TALK.busy)return;TALK.busy=false;setMic('idle');if(TALK.handsFree)listen();});
  }catch(e){
   TALK.busy=false;setMic('idle');p.bubbleT=0;const code=e&&e.code;if(code==='cancelled')return;TALK.handsFree=false;
-  if(code==='no_ai'){openAISheet();return;}
-  if(code==='bad_key'){toast("That API key didn't work. Check it in Brain.");openAISheet();return;}
+  if(code==='no_ai'){toast('Add a brain in Settings on the start screen.');return;}
+  if(code==='bad_key'){toast("That API key didn't work. Check it in Settings on the start screen.");return;}
   if(code==='not_granted'||code==='sampling_disabled')toast('Claude access was declined for this page, so people can only wave for now.');
   else if(code==='rate_limited')toast('Too many messages at once. Wait a moment and try again.');
   else if(code==='refused'){p.say("I'd rather not talk about that.");}
@@ -2108,40 +2137,50 @@ function listen(){
 function stopTalk(){TALK.handsFree=false;TALK.busy=false;TALK.empty=0;if(TALK.rec){try{TALK.rec.abort();}catch(e){}TALK.rec=null;}TALK.listening=false;
  if(TALK.abort){TALK.abort.abort();TALK.abort=null;}if(TALK.target){TALK.target.talkT=0;TALK.target.chatHold=4;}
  setMic('idle');setTimeout(()=>{if(!TALK.busy&&!TALK.listening)caption(null);},3500);}
-async function aiAvailable(){const m=await brainMode();if(m==='local'&&!LLM.engine)ensureLocal().catch(()=>{});return m!=='ask';}
+async function aiAvailable(){const m=await brainMode();if(m==='local'&&!LLM.engine)ensureLocal().catch(()=>{});return true;}
 function renderBrainSheet(){
  const sz=brainSize();document.querySelectorAll('#brainSizes button').forEach(b=>b.classList.toggle('on',b.dataset.size===sz));
  const go=$('#brainGo');
  if(LLM.engine){$('#brainState').textContent='Ready · free and unlimited';go.textContent='Brain ready';go.disabled=true;}
  else if(LLM.loading){go.textContent='Downloading…';go.disabled=true;}
  else{go.disabled=false;go.textContent=brainDownloaded()?'Load brain':'Download brain';$('#brainState').textContent=aiKey()?'Using your Claude key':'Free and unlimited';}
- $('#aiForget').hidden=!aiKey();$('#aiKey').value='';
+ $('#aiForget').hidden=!aiKey();$('#aiKey').value='';$('#brainDel').hidden=!(LLM.engine||brainDownloaded())||!!LLM.loading;
 }
-function openAISheet(){closeSheet();$('#talkBar').hidden=true;$('#talkBar').hidden=true;$('#aiSheet').hidden=false;renderBrainSheet();
+function openSettings(){$('#settings').hidden=false;$('#settings').scrollTop=0;renderBrainSheet();renderFps();
  gpuOK().then(g=>{if(!g){$('#brainText').textContent="This phone's browser can't run the built-in AI (it needs WebGPU, found in recent Chrome and the newest iPhones). People will give simple replies, or you can add a Claude key below.";$('#brainGo').hidden=true;$('#brainSizes').hidden=true;}});}
+async function deleteBrain(){
+ if(LLM.loading){toast('Wait for the download to finish first.');return;}
+ try{if(LLM.engine)await LLM.engine.unload();}catch(e){}LLM.engine=null;LLM.model=null;
+ try{for(const k of await caches.keys())if(/webllm|tvmjs/i.test(k))await caches.delete(k);}catch(e){}
+ try{localStorage.removeItem('roommates.brainModel');}catch(e){}
+ $('#brainGo').disabled=false;renderBrainSheet();toast('Brain deleted. People will give simple replies until you download one again.');
+}
 function openTalkBar(msg){$('#talkBar').hidden=false;if(msg)toast(msg);setTimeout(()=>$('#talkInput').focus(),50);}
 $('#micBtn').addEventListener('click',async()=>{
  initAudio();
  if(TALK.listening||TALK.busy){stopTalk();return;}
- if(!(await aiAvailable())){openAISheet();return;}
+ await aiAvailable();
  const p=pickTalkTarget();if(!p){toast('Walk up to someone and face them to talk.');return;}
  engage(p);TALK.handsFree=true;TALK.empty=0;listen();toastOnce('talk',`Talk to ${p.cfg.name}. They'll answer in a bubble over their head, then the mic listens again. Tap the button to stop.`);
 });
-$('#typeBtn').addEventListener('click',async()=>{initAudio();if(!(await aiAvailable())){openAISheet();return;}openTalkBar();});
+$('#typeBtn').addEventListener('click',async()=>{initAudio();await aiAvailable();openTalkBar();});
 $('#talkBar').addEventListener('submit',e=>{e.preventDefault();const v=$('#talkInput').value.trim();if(!v)return;$('#talkInput').value='';TALK.handsFree=false;if(TALK.busy)stopTalk();sendLine(v);});
 $('#talkClose').addEventListener('click',()=>{$('#talkBar').hidden=true;});
-$('#toolBrain').addEventListener('click',openAISheet);
+$('#btnSettings').innerHTML=svg('gear');$('#btnSettings').addEventListener('click',openSettings);
+$('#setClose').addEventListener('click',()=>{$('#settings').hidden=true;});
+$('#brainDel').addEventListener('click',deleteBrain);
+$('#btnGoogle').addEventListener('click',()=>toast('Google sign-in is coming soon.'));
+$('#fpsSeg').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;FPS.cap=+b.dataset.fps;try{localStorage.setItem('deathave.fps',String(FPS.cap));}catch(err){}renderFps();});
 if(brainDownloaded())setTimeout(()=>gpuOK(),1500);
-$('#aiClose').addEventListener('click',()=>{$('#aiSheet').hidden=true;});
 $('#brainSizes').addEventListener('click',e=>{const b=e.target.closest('button');if(!b||LLM.loading)return;try{localStorage.setItem('roommates.brainSize',b.dataset.size);}catch(err){}
  if(LLM.engine&&!LLM.model.startsWith(b.dataset.size==='light'?'Qwen':'Llama')){try{LLM.engine.unload();}catch(err){}LLM.engine=null;try{localStorage.removeItem('roommates.brainModel');}catch(err){}}renderBrainSheet();});
 $('#brainGo').addEventListener('click',()=>{ensureLocal().then(()=>{renderBrainSheet();toast('Brain ready. Tap the mic and talk to anyone.');beep(700,.07);})
  .catch(e=>{renderBrainSheet();toast(e&&e.code==='no_gpu'?"This phone can't run the built-in AI.":e&&e.code==='brain_memory'?'Not enough memory. Pick Light and try again.':"The download didn't finish. Check your connection and try again.");});renderBrainSheet();});
 $('#aiSave').addEventListener('click',()=>{const k=$('#aiKey').value.trim();if(!/^sk-ant-/.test(k)){toast('That doesn\'t look like a Claude API key. They start with sk-ant-.');return;}
- try{localStorage.setItem('roommates.claudeKey',k);}catch(e){}$('#aiSheet').hidden=true;toast('Claude key saved on this phone. Other players still use the free brain.');});
+ try{localStorage.setItem('roommates.claudeKey',k);}catch(e){}renderBrainSheet();toast('Claude key saved on this phone. Other players still use the free brain.');});
 $('#aiForget').addEventListener('click',()=>{try{localStorage.removeItem('roommates.claudeKey');}catch(e){}renderBrainSheet();toast('Key removed. Back to the free built-in brain.');});
 $('#typeBtn').innerHTML=svg('kbd');setMic('idle');
-getSample().then(s=>{if(s){$('#toolBrain').hidden=true;}});
+getSample().then(s=>{if(s){$('#brainText').textContent='On this page, people talk back using Claude, so there is nothing to download.';$('#brainGo').hidden=true;$('#brainSizes').hidden=true;}});
 
 /* ================= creator ================= */
 const TABS=[
@@ -2268,8 +2307,12 @@ function updateStatus(){
 }
 
 /* ================= loop ================= */
+const FPS={cap:60,next:0};try{const v=+localStorage.getItem('deathave.fps');if([30,60,90,120].includes(v))FPS.cap=v;}catch(e){}
+function renderFps(){document.querySelectorAll('#fpsSeg button').forEach(b=>b.classList.toggle('on',+b.dataset.fps===FPS.cap));}
 let last=performance.now();
 renderer.setAnimationLoop((time,frame)=>{
+ // frame rate cap (AR sessions always run at the headset's own rate)
+ if(!frame){const nowc=performance.now(),iv=1000/FPS.cap;if(nowc-FPS.next<iv-1)return;FPS.next=nowc-FPS.next>iv*2?nowc:FPS.next+iv;}
  const now=performance.now(),dt=Math.min(.05,Math.max(.001,(now-last)/1000)),t=now/1000;last=now;
  if(cr.open&&!cr.inXR){creatorTick(dt,t);renderCreator(dt,t);return;}
  if(mode==='menu'&&W.menuArt&&!$('#menu').hidden)return;
