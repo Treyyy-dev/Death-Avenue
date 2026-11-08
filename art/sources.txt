@@ -1,2 +1,1 @@
-start.webp https://d8j0ntlcm91z4.cloudfront.net/user_3K6QP4i5xFR5ycxs1fK5oVOgn0s/hf_20261107_233857_572bd855-4975-420b-964e-63c6bb9ffdef_min.webp
-start.png https://d8j0ntlcm91z4.cloudfront.net/user_3K6QP4i5xFR5ycxs1fK5oVOgn0s/hf_20261107_233857_572bd855-4975-420b-964e-63c6bb9ffdef.png
+start-wide.png https://d8j0ntlcm91z4.cloudfront.net/user_3K6QP4i5xFR5ycxs1fK5oVOgn0s/hf_20261108_025828_5fb9f503-e424-4c1b-bd79-20dc64867064.png
