@@ -160,8 +160,10 @@ h1 span{color:var(--siren)}
 .gear{position:absolute;z-index:3;top:calc(18px + env(safe-area-inset-top,0px));right:max(16px,env(safe-area-inset-right,0px));width:46px;height:46px;padding:0;display:grid;place-items:center;border-radius:12px;
   background:rgba(12,14,19,.45);border:1.5px solid rgba(242,241,238,.75);color:#fff;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
 .gear svg{width:24px;height:24px}
-.set-sec{display:grid;gap:10px;border-top:1px solid var(--line);padding-top:14px}
-.set-sec .label{display:flex;justify-content:space-between;align-items:center}
+.set-sec{display:grid;gap:10px;border-top:1px solid var(--line);padding-top:14px;text-align:center;justify-items:stretch}
+.set-sec .label{display:flex;flex-direction:column;justify-content:center;align-items:center;gap:6px}
+#settings .sheet-head{text-align:center}#settings .sheet-head div{padding-left:72px}
+#settings summary{text-align:center;list-style-position:inside}
 .gbtn{display:flex;align-items:center;justify-content:center;gap:10px;background:#fff;color:#1f1f1f;border:0;border-radius:14px;padding:14px;font:700 15px var(--body)}
 .gbtn svg{width:20px;height:20px}
 .soon{font:700 10.5px var(--body);letter-spacing:.06em;text-transform:uppercase;color:var(--warn)}
