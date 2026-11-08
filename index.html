@@ -231,12 +231,21 @@ input[type=text]{width:100%;background:var(--raise);border:1px solid var(--line)
 .confirm div{display:flex;gap:8px}
 .confirm button{border-radius:999px;padding:9px 14px;font:700 13px var(--body);border:1px solid var(--line);background:var(--raise)}
 .del{background:none;border:0;color:var(--danger);font:700 13px var(--body);padding:4px 0;justify-self:start}
-@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+/* TreyyyVerse intro: 5 seconds, can't be skipped */
+#splash{position:fixed;inset:0;z-index:100;background:#000;display:grid;place-items:center;pointer-events:auto;touch-action:none;transition:opacity .45s ease}
+#splash img{width:min(75vw,520px);height:auto;image-rendering:pixelated;opacity:0;animation:splashIn 5s ease forwards}
+#splash.done{opacity:0}
+@keyframes splashIn{0%{opacity:0;transform:scale(.96)}14%{opacity:1;transform:scale(1)}88%{opacity:1}100%{opacity:1;transform:scale(1.02)}}
+@media (prefers-reduced-motion:reduce){#splash img{animation:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){*:not(#splash img){transition:none!important;animation:none!important}}
 </style>
 
 </head>
 <body>
 <canvas id="gl"></canvas>
+<div id="splash" role="img" aria-label="TreyyyVerse"><img alt="TreyyyVerse" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAtoAAACJCAAAAAA3AMCfAAACr0lEQVR42u3d2W7bMBAF0JlC///L08emSBzIosTN5zylgK1quaZHFElHAAAAAAAAAAAAbCm//qPu2Qyt6vRZLtfjlT9OwYafAUR7qy9dRBvRBtFGrS3aINog2iDaiDaINog2iDaINog2og2iDaINog2iDf85ovd81Toz+akuzZ6q61Obs+8mXrwoxw7svnBC68S+V8N0uLo+je5ozsqbO/LvJdV6Ic9uoNoTU/kJUwiajvLlm0tBEubGrnxoqdYmzGVbsNae8uDLkgafOC9Tqy0JofMPRBtEGx6p4o4J9juvHkhZ+e7eZJw8oZU/bbvOPbp6YL9/fgp4uIXiketZo+OiINHtotYG0SYshS3aINog2oSpCKpctrxKR++dr6aj1tl1c4xqpQDnW72exwRHZdDpuh+PUmuDaINo4958gmgrqIn9Ov/EWosdvbsMDt9txNixiqnWBtGGY4XqwzPIr+ch209LrVlMljEk+y2o5+OuIAHRZu8JnqLN6JuqNF6bJbNdgx7jiDbTVCSpIAHRdtcl2iDaINoQFmuIpzo+7yhOq+smfp+6XbP2JJ//z6pDDrTaKEhAtEG0QbRBtEG0Cf3aMd2oCcs8THxCq+PomdRq0y2OpSAB0QbRRrSdgrDIZOghefri1Nj33/MrL/f+UEwOWQpStB9reGrM+2Oz7otFf9/qnt1WkKg4Nj1kizWw6UdWq/3mZcjU/Kq1p2wdqnkTOXwTaLURbVCQfMqdiZpaqw2iDbN8c1fW95f9sh5y5exPg6u9dphjEz1PWH77c4FfAUqD7UVbQQKiDaHzb9I5fnNsAq02iDaiDaINog2iDaINok14ZBPmm4ZR3VptEG0QbRBtEG1EG0QbRBtEG0QbRJswjGJRdWKd32yatJs3zfs1hAQAAAAAAAAAAB7yF+aAdwyVQPXCAAAAAElFTkSuQmCC"></div>
+<script>setTimeout(function(){var s=document.getElementById('splash');if(!s)return;s.classList.add('done');setTimeout(function(){s.remove();},460);},5000);</script>
+
 <video id="cam" playsinline muted autoplay></video>
 
 <div id="ui">
